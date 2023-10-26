@@ -1,16 +1,26 @@
 import numpy as np
 import simpleaudio as sa
 
-frequency = 50  # Our played note will be 440 Hz
-frequency_2 = 440
+# requency = 50  # magic low frequency
+f = 1/4
+f2 = 50 # 440
 fs = 44100  # 44100 samples per second
 seconds = 10  # Note duration of 3 seconds
+
+# sin of frequency (not radians)
+def sinf(x):
+    return np.sin(x* 2 * np.pi)
+
+# sinf between 0 and 1
+def sinf_norm(x):
+    return 0.5*sinf(x) + 0.5
 
 # Generate array with seconds*sample_rate steps, ranging between 0 and seconds
 t = np.linspace(0, seconds, seconds * fs, False)
 
-# Generate a 440 Hz sine wave
-note = np.sin(frequency * t * 2 * np.pi) + 2*np.sin(frequency_2 * t * 2 * np.pi)
+# Play a bass tone with osscilating volume
+# that never quite gets silent
+note = sinf_norm(f*t) * sinf(f2 * t) + 1/3*sinf(f2*t)
 
 # Ensure that highest value is in 16-bit range
 audio = note * (2**15 - 1) / np.max(np.abs(note))
