@@ -22,6 +22,10 @@ def cosf(x):
 def cosf_norm(x):
     return 0.5*cosf(x) + 0.5
 
+# wave from 0 to 1, starting at 0 at t=0
+def norm_wave(x):
+    return -0.5*cosf(x) + 0.5
+
 if __name__=="__main__":
     # Generate array with seconds*sample_rate steps, ranging between 0 and seconds
     t = np.linspace(0, seconds, seconds * fs, False)

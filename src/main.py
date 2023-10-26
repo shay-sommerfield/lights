@@ -5,7 +5,7 @@ from time import sleep
 import time
 import numpy as np
 import simpleaudio as sa
-from audio import sinf, sinf_norm, cosf, cosf_norm
+from audio import sinf, sinf_norm, cosf, cosf_norm, norm_wave
 desk_light_ips = ['192.168.68.57', '192.168.68.55']
 
 async def detect_lights(bulbs):
@@ -27,6 +27,7 @@ def linterp(p0,p1,x):
 
 	return y0 + (x-x0)*(y1-y0)/(x1-x0)
 
+# complex and might not be needed
 def corrected_sinf(omega,t,lastVal):
 	upper_bound = 235
 	lower_bound = 20
@@ -54,14 +55,14 @@ def corrected_sinf(omega,t,lastVal):
 
 
 
-async def ossciliate(lights, seconds_per_cycle, frequency, duration):
+async def ossciliate(lights, seconds_per_cycle, frequency, duration, delay=0):
 	start_time = time.time()
-
+	sleep(delay)
 	while((time.time() - start_time) < duration):
 		dt = time.time() - start_time
 		# sin wave between 3 and 255
-		val = int(251*sinf_norm(frequency*dt) + 4)
-		# print(val)
+		val = int(251*norm_wave(frequency*dt) + 4)
+		print(val)
 		await asyncio.gather(*[light.turn_on(PilotBuilder(warm_white=val)) for light in lights])
 		# sleep(0.05)
 
@@ -91,10 +92,10 @@ async def main():
 	# bulbs = await discovery.discover_lights(broadcast_space="192.168.71.255")
 
 	# requency = 50  # magic low frequency
-	f_volume = 1/4
+	f_volume = 1/8
 	f_tone = 50 # 440
 	fs = 44100  # 44100 samples per second
-	duration = 10  # Note duration of 3 seconds
+	duration = 30  # Note duration of 3 seconds
 
 	# lights 
 	lights = [wizlight(ip) for ip in desk_light_ips]
@@ -104,7 +105,7 @@ async def main():
 
     # Play a bass tone with osscilating volume
     # that never quite gets silent
-	note = -sinf_norm(f_volume*t) * sinf(f_tone * t) + 1/3*sinf(f_tone*t)
+	note = norm_wave(f_volume*t) * sinf(f_tone * t) + 1/3*sinf(f_tone*t)
 
     # Ensure that highest value is in 16-bit range
 	audio = note * (2**15 - 1) / np.max(np.abs(note))
@@ -118,7 +119,7 @@ async def main():
     # Start playback
 	play_obj = sa.play_buffer(audio, 1, 2, fs)
 
-	await ossciliate(lights,duration,f_volume, duration)
+	await ossciliate(lights,duration,f_volume, duration,0.1)
 
 async def main_2():
 	lights = [wizlight(ip) for ip in desk_light_ips]
