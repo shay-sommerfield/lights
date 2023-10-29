@@ -39,7 +39,7 @@ async def main_loop():
 	duration =  2*60 + 13 # seconds
 	try:
 		await asyncio.gather(*[light.turn_on(PilotBuilder(rgb=(255,0,0))) for light in lights])
-	catch e:
+	except Exception as e: 
 		print(e)
 	
 	sleep(duration)
