@@ -1,15 +1,17 @@
 import asyncio
-import math
 from pywizlight import discovery, PilotBuilder, wizlight
 from pygame import mixer
 from time import sleep
 import time
-import numpy as np
-import simpleaudio as sa
-from audio import sinf, sinf_norm, cosf, cosf_norm, norm_wave
 import sys
 
-desk_light_ips = ['192.168.68.57', '192.168.68.55']
+# desk_light_ips = ['192.168.68.57', '192.168.68.55']
+
+bathroom_ips = [
+	'192.168.68.70',
+	'192.168.68.69',
+	'192.168.68.68',
+	]
 
 MIN_FLOAT=sys.float_info.min
 
@@ -29,13 +31,17 @@ async def detect_lights(bulbs):
 
 async def main_loop():
 
-	lights = [wizlight(ip) for ip in desk_light_ips]
+	lights = [wizlight(ip) for ip in bathroom_ips]
 	mixer.init()
 	mixer.music.load('../deep_singing_monk.mp3')
 	mixer.music.play()
 
 	duration =  2*60 + 13 # seconds
-	await asyncio.gather(*[light.turn_on(PilotBuilder(rgb=(255,0,0))) for light in lights])
+	try:
+		await asyncio.gather(*[light.turn_on(PilotBuilder(rgb=(255,0,0))) for light in lights])
+	catch e:
+		print(e)
+	
 	sleep(duration)
 	mixer.music.stop()
 	mixer.music.unload()

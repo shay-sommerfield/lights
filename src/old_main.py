@@ -9,7 +9,11 @@ import simpleaudio as sa
 from audio import sinf, sinf_norm, cosf, cosf_norm, norm_wave
 import sys
 
-desk_light_ips = ['192.168.68.57', '192.168.68.55']
+desk_light_ips = [
+	'192.168.68.70',
+	'192.168.68.69',
+	'192.168.68.68',
+	]
 
 MIN_FLOAT=sys.float_info.min
 
@@ -174,12 +178,10 @@ async def main():
 		await linear_ramp(lights,ramp_duration,4,255,True)
 
 async def main_2():
-	lights = [wizlight(ip) for ip in desk_light_ips]
-	await asyncio.gather(*[light.turn_off() for light in lights])
-	await asyncio.gather(*[light.turn_on(PilotBuilder(warm_white=4)) for light in lights])
+	bulbs = await discovery.discover_lights(broadcast_space="192.168.71.255")
+
+	for bulb in bulbs:
+		print(bulb.ip)
 
 loop = asyncio.get_event_loop()
-# loop.run_until_complete(main())
-loop.run_until_complete(main())
-
-
+loop.run_until_complete(main_2())
