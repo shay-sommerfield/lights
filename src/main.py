@@ -30,23 +30,41 @@ async def detect_lights(bulbs):
 		sleep(1)
 
 async def main_loop():
-
+	switch_on = False
 	lights = [wizlight(ip) for ip in bathroom_ips]
 	mixer.init()
 	mixer.music.load('../deep_singing_monk.mp3')
-	mixer.music.play()
 
-	duration =  2*60 + 13 # seconds
-	try:
-		await asyncio.gather(*[light.turn_on(PilotBuilder(rgb=(255,0,0))) for light in lights])
-	except Exception as e: 
-		print(e)
-	
-	sleep(duration)
-	mixer.music.stop()
-	mixer.music.unload()
+	while True:
+		if not switch_on:
+			try:
+				await asyncio.gather(*[light.turn_on(PilotBuilder(warm_white=128)) for light in lights])
+				switch_on = True
+				sleep(1)
+			except Exception as e: 
+				print(e)
+
+		if switch_on:
+			mixer.music.play()
+			sleep(1.8)
+
+			duration =   13 # seconds 2*60 +
+			start_time = now()
+			while now() - start_time < duration:
+				try:
+					await asyncio.gather(*[light.turn_on(PilotBuilder(rgb=(255,0,0))) for light in lights])
+					# sleep(1)
+				except Exception as e:
+					switch_on = False
+					mixer.music.stop()
+					print(e)
+					break
+
+			if switch_on():
+				mixer.music.stop()
 
 async def main():
+
 	while True:
 		await main_loop()
 
