@@ -1,0 +1,14 @@
+{
+    "192.168.68.58": {
+        "room": "bathroom",
+        "name": "bathroom_1"
+    },
+    "192.168.68.55": {
+        "room": "bathroom",
+        "name": "bathroom_2"
+    },
+    "192.168.68.56": {
+        "room": "bathroom",
+        "name": "bathroom_3"
+    }
+}
