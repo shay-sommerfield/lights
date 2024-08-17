@@ -27,3 +27,6 @@ pip install pywizlight
 ```
 
 You're all set up baby!
+```
+python color_change.py
+```
