@@ -3,6 +3,8 @@ import os
 from typing import List
 import sys
 
+from pywizlight import wizlight, discovery
+
 def save_bulb_group(group_name: str, mac_array: List[str]):
     
     if len(mac_array) <= 0:
@@ -27,3 +29,14 @@ def get_bulb_group_macs(group_name: str) -> List[str]:
         macs = json.load(json_file)
     
     return macs
+
+async def get_wiz_light_from_group(group_name: str) -> List[wizlight]:
+    mac_addresses = get_bulb_group_macs(group_name)
+    bulbs = await discovery.discover_lights()
+
+    lights = []
+    for bulb in bulbs:
+        if bulb.mac == mac_addresses:
+            lights.append(wizlight(bulb.ip))
+
+    return lights
