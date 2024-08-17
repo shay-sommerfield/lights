@@ -17,25 +17,50 @@ def now():
 async def detect_lights() -> List[wizlight]:
 	bulbs = await discovery.discover_lights()
 	orb_lights = []
-	for number, bulb in enumerate(bulbs):
-		if bulb.mac in three_orb_macs:
-			orb_lights.append(wizlight(bulb.ip))
+	for mac in three_orb_macs:
+		for bulb in bulbs:
+			if bulb.mac == mac:
+				orb_lights.append(wizlight(bulb.ip))
 	
 	return orb_lights
 
+async def turn_all_off(bulbs: List[wizlight]):
+	for bulb in bulbs:
+		await bulb.turn_off()
+
+async def change_light_state(orbs: List[wizlight], num):
+	for i, digit in enumerate(num):
+		if digit == "1":
+			await orbs[i].turn_on()
+		elif digit == "0":
+			await orbs[i].turn_off()
+		
+
+	
 async def main_loop():
 	orbs = await detect_lights()
 	top = orbs[0]
 	middle = orbs[1]
 	bottom = orbs[2]
+	# switch order so the bottom light turns on first
+	await turn_all_off(orbs)
 
-	for light in orbs:
-		await light.turn_off()
+	bins = [
+		"000",
+		"001",
+		"010",
+		"011",
+		"100",
+		"101",
+		"110",
+		"111",
+	]
+
+	for num in bins:
+		await change_light_state(orbs, num)
 		sleep(1)
 
-	for light in orbs:
-		await light.turn_on()
-		sleep(1)
+		
 
 # async def main_loop():
 
@@ -55,7 +80,7 @@ async def main_loop():
 # 	mixer.music.unload()
 
 if __name__ == "__main__":
-	loop = asyncio.get_event_loop()
+	loop = asyncio.new_event_loop()
 	loop.run_until_complete(main_loop())
 
 
