@@ -25,7 +25,9 @@ def save_bulb_group(group_name: str, mac_array: List[str]):
 
 def get_bulb_group_macs(group_name: str) -> List[str]:
     # Write the array to a JSON file
-    with open(f'../bulb_groups/{group_name}.json') as json_file:
+    path_of_this_file = os.path.abspath(__file__)
+    utils_dir = os.path.dirname(path_of_this_file)
+    with open(f'{utils_dir}/../bulb_groups/{group_name}.json') as json_file:
         macs = json.load(json_file)
     
     return macs
@@ -36,7 +38,7 @@ async def get_wiz_light_from_group(group_name: str) -> List[wizlight]:
 
     lights = []
     for bulb in bulbs:
-        if bulb.mac == mac_addresses:
+        if bulb.mac in mac_addresses:
             lights.append(wizlight(bulb.ip))
 
     return lights
