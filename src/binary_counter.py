@@ -39,13 +39,13 @@ async def change_light_state(orbs: List[wizlight], num):
 	
 async def main_loop():
 	orbs = await detect_lights()
-	top = orbs[0]
-	middle = orbs[1]
-	bottom = orbs[2]
-	# switch order so the bottom light turns on first
+	# top = orbs[0]
+	# middle = orbs[1]
+	# bottom = orbs[2]
+
 	await turn_all_off(orbs)
 
-	bins = [
+	binary_0_to_8 = [
 		"000",
 		"001",
 		"010",
@@ -56,7 +56,7 @@ async def main_loop():
 		"111",
 	]
 
-	for num in bins:
+	for num in binary_0_to_8:
 		await change_light_state(orbs, num)
 		sleep(1)
 
