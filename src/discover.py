@@ -1,4 +1,9 @@
+#!/usr/bin/env python
+import argparse
+import asyncio
+
 from pywizlight.discovery import discover_lights
+
 from bulb_groups import save_bulb_group
 
 async def discover():
@@ -8,8 +13,20 @@ async def discover():
         print(bulb.ip, bulb.mac, bulb.bulbtype)
         bulb_macs.append(bulb.mac)
     
-    save_bulb_group('three_orbs', bulb_macs)
+    if args.save:
+        save_bulb_group(args.save, bulb_macs)
 
 # Run the discover function
-import asyncio
-asyncio.run(discover())
+if __name__=="__main__":
+   # Initialize the parser
+    parser = argparse.ArgumentParser(description="Process some optional arguments.")
+
+    # Add optional arguments
+    parser.add_argument("--save", help="name to save bulb address to the bulb_groups directory")
+
+    # Parse the arguments
+    args = parser.parse_args()
+
+    # Accessing the arguments
+    option1 = args.save
+    asyncio.run(discover())
