@@ -80,18 +80,18 @@ async def color_sequence_in_sync(bulbs: List[wizlight]):
 		sleep(2)
 
 #generic function to cycle light through colors at desired starting point in array
-async def color_cycle(bulb: wizlight, i: int, j: int):
+async def color_cycle(bulb: wizlight, i: int):
 	# continually iterate through list and shift starting point according to i
 	rgb_colors = cycle(rgb_palette)
 	shifted_colors = islice(rgb_colors, i, None)
 	for rgb_color_tuple in shifted_colors:
 		color = PilotBuilder(rgb=rgb_color_tuple)
 		await bulb.turn_on(color)
-		await asyncio.sleep(j) #await coroutine
+		await asyncio.sleep(2) #await coroutine
 
 #goal is to change color of three lights in shifted sequence simultaneously
 async def run_cycle_for_all_lights(bulbs: List[wizlight]):
-	await asyncio.gather(color_cycle(bulbs[0], 0, 2), color_cycle(bulbs[1], 1, 2), color_cycle(bulbs[2], 2, 2))
+	await asyncio.gather(color_cycle(bulbs[0], 0), color_cycle(bulbs[1], 1), color_cycle(bulbs[2], 2))
 		
 async def change_light_state(orbs: List[wizlight], num):
 	for i, digit in enumerate(num):
