@@ -14,7 +14,7 @@ pyenv install 3.12
 pyenv virtualenv 3.12 lights
 ```
 
-- In vscode, type `command + p`
+- In vscode, type `command + shift + p`
 - Then type `>Python:select Interpreter`
 - Then select your `lights` virtualenv
 
