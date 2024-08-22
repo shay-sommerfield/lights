@@ -104,9 +104,8 @@ async def main_loop():
 	# get wiz lights using the name of a file stored in
 	# the bulb_groups directory
 	orb_lights = await get_wiz_light_from_group('three_orbs')	
-	#for bulb in orb_lights:
-#		await bulb.reboot()
 
+	#reset bulbs
 	for bulb in orb_lights:
 		await bulb.turn_on(PilotBuilder(rgb=[0,0,0]))
 	await asyncio.sleep(5)
@@ -121,13 +120,11 @@ async def main_loop():
 		await run_cycle_for_all_lights(orb_lights)
 		
 if __name__ == "__main__":
-	# Not sure why these are needed exactly, but they is required
-	# to run an asynchronous function to completion.
-
-	# My guess is that it abstracts the checking that 
-	# an asynchronous operation has been completed.
-	loop = asyncio.new_event_loop()
-	loop.run_until_complete(main_loop())
+	asyncio.run(main_loop())
+	
+	#keep below for future reference if above breaks sync
+	#loop = asyncio.new_event_loop()
+	#loop.run_until_complete(main_loop())
 
 
 
