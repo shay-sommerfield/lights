@@ -77,21 +77,21 @@ async def color_sequence_in_sync(bulbs: List[wizlight]):
 	for rgb_color_tuple in cycle(brighter_palette):
 		color = PilotBuilder(rgb=rgb_color_tuple)
 		await asyncio.gather(bulbs[0].turn_on(color), bulbs[1].turn_on(color), bulbs[2].turn_on(color))
-		sleep(0.75)
+		sleep(2)
 
 #generic function to cycle light through colors at desired starting point in array
-async def color_cycle(bulb: wizlight, i: int):
+async def color_cycle(bulb: wizlight, i: int, j: int):
 	# continually iterate through list and shift starting point according to i
 	rgb_colors = cycle(rgb_palette)
 	shifted_colors = islice(rgb_colors, i, None)
 	for rgb_color_tuple in shifted_colors:
 		color = PilotBuilder(rgb=rgb_color_tuple)
 		await bulb.turn_on(color)
-		sleep(1)
+		await asyncio.sleep(j) #await coroutine
 
 #goal is to change color of three lights in shifted sequence simultaneously
 async def run_cycle_for_all_lights(bulbs: List[wizlight]):
-	await asyncio.gather(color_cycle(bulbs[0], 0), color_cycle(bulbs[1], 1), color_cycle(bulbs[2], 2))
+	await asyncio.gather(color_cycle(bulbs[0], 0, 2), color_cycle(bulbs[1], 1, 2), color_cycle(bulbs[2], 2, 2))
 		
 async def change_light_state(orbs: List[wizlight], num):
 	for i, digit in enumerate(num):
@@ -104,6 +104,12 @@ async def main_loop():
 	# get wiz lights using the name of a file stored in
 	# the bulb_groups directory
 	orb_lights = await get_wiz_light_from_group('three_orbs')	
+	#for bulb in orb_lights:
+#		await bulb.reboot()
+
+	for bulb in orb_lights:
+		await bulb.turn_on(PilotBuilder(rgb=[0,0,0]))
+	await asyncio.sleep(5)
 
 	# all actions related to making calls to the light must be awaited
 	# This is denoted by 'async' at the start of a method
