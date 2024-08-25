@@ -12,7 +12,7 @@ import binary_counter
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost"],  # Adjust this based on where your HTML page is served
+    allow_origins=["*"],  # Adjust this based on where your HTML page is served
     allow_credentials=True,
     allow_methods=["*"],  # Allows all HTTP methods
     allow_headers=["*"],  # Allows all headers
