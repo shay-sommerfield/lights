@@ -49,14 +49,14 @@ int send_udp_message(const char *message, size_t message_len, const char *ip_add
 }
 
 int main(void) {
-    const char *message = ON_MESSAGE;
+    const char *message = OFF_MESSAGE;
     const char *ip_address = LIGHT1;  // Replace with your IP address
     int port = PORT;  // Replace with your port
 
     const char *ip_addresses[] = {
-        LIGHT1,
+        LIGHT3,
         LIGHT2,
-        LIGHT3
+        LIGHT1
     };
 
     // Number of IP addresses in the array
