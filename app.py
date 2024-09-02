@@ -73,9 +73,9 @@ async def greet(name: Optional[str] = None, age: Optional[int] = None):
         greeting = "Hello, stranger!"
 
     if age:
-        return {"message": f"{greeting} You are {age} years old."}
+        return f"{greeting} You are {age} years old."
     else:
-        return {"message": greeting}
+        return greeting
     
 # Define a route to serve the index.html page
 @app.get("/")
