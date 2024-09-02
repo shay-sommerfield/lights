@@ -31,7 +31,7 @@ You're all set up baby!
 python color_change.py
 ```
 
-## Light Programs
+## Light Programs locally
 A program dynamically updates the lights and generally continues running forever. 
 These all live in the `programs` directory.
 
@@ -40,7 +40,8 @@ To run the main of a program without running the server, run the following from 
 ```bash
 python -m programs.color_cycle
 ```
-## Run the server
+
+## Light Programs from the server
 Run `./start_server.sh` to start a localhost server
 
 ### Testing the server is up
@@ -51,7 +52,8 @@ curl http://127.0.0.1:8000/greet/
 You should receive a nice message. 
 
 ### Other server methods
-This just sends a GET http request to the address specified.
+
+#### GET methods
 
 From a high level, a get request just allows us to call a function on a server
 without any arguments. So the following is like calling `run_color_cycle()` in a python script:
@@ -60,7 +62,21 @@ without any arguments. So the following is like calling `run_color_cycle()` in a
 curl http://127.0.0.1:8000/run_color_cycle/
 ```
 
-The other api method currently supported is:
+The following are also supported:
+- `run_binary_counter`
+- `turn_off_orbs`
+
+#### Post methods
+
+From a high level, post requests are used to pass arguments to a server function. In this case, we pass the
+arguments as a JSON object.
+
+The following will turn all of the orb lights to red:
+```bash
+curl -X POST "http://127.0.0.1:8000/turn_on_orbs/" -H "Content-Type: application/json" -d '{"rgb": [255,0,0]}'
 ```
-curl http://127.0.0.1:8000/run_binary_counter/
+
+Because I made the `rgb` field optional, passing an empty object just turns all of the lights on to white:
+```
+curl -X POST "http://127.0.0.1:8000/turn_on_orbs/" -H "Content-Type: application/json" -d '{}'
 ```
