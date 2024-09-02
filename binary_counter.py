@@ -40,13 +40,15 @@ async def toggle(bulbs: List[wizlight]):
 	# tasks = [bulb.lightSwitch() for bulb in bulbs]
 	await asyncio.gather(bulbs[0].lightSwitch(), bulbs[1].lightSwitch(), bulbs[2].lightSwitch())
 
-async def change_light_state(orbs: List[wizlight], num):
+async def change_light_state(orbs: List[wizlight], num: str, old_num: str):
 	tasks = []
 	for i, digit in enumerate(num):
-		if digit == "1":
-			tasks.append(orbs[i].turn_on())
-		elif digit == "0":
-			tasks.append(orbs[i].turn_off())
+		old_digit = old_num[i]
+		if digit != old_digit:
+			if digit == "1":
+				tasks.append(orbs[i].turn_on())
+			elif digit == "0":
+				tasks.append(orbs[i].turn_off())
 	
 	await asyncio.gather(*tasks)
 
@@ -70,11 +72,11 @@ async def main_loop():
 		"111",
 	]
 
-	# for num in cycle(binary_0_to_8):
-	# 	await toggle(orbs)
-	# 	await asyncio.sleep(10)
-	for bulb in orbs:
-		print(bulb.ip)
+	lastNum = "000"
+	for num in cycle(binary_0_to_8):
+		await change_light_state(orbs, num, lastNum)
+		lastNum = num
+		await asyncio.sleep(3)
 
 		
 
