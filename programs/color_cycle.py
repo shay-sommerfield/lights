@@ -1,8 +1,8 @@
 
 # library for waiting for network operations to finish
 import asyncio 
-from itertools import cycle, islice
-from typing import List, Tuple 
+from itertools import cycle
+from typing import List, Optional, Tuple 
 from time import sleep
 
 from pywizlight import PilotBuilder, wizlight
@@ -100,15 +100,9 @@ async def change_light_state(orbs: List[wizlight], num):
 		elif digit == "0":
 			await orbs[i].turn_off()
 	
-async def main_loop():
-	# get wiz lights using the name of a file stored in
-	# the bulb_groups directory
-	orb_lights = await get_wiz_light_from_group('three_orbs')	
-
-	#reset bulbs
-	for bulb in orb_lights:
-		await bulb.turn_off()
-	await asyncio.sleep(2)
+async def main_loop(orb_lights: Optional[List[wizlight]] = None):
+	if not orb_lights:
+		orb_lights = await get_wiz_light_from_group('three_orbs')	
 
 	# all actions related to making calls to the light must be awaited
 	# This is denoted by 'async' at the start of a method
