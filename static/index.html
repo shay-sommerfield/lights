@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple POST Requests</title>
+</head>
+<body>
+    <h1>Send POST Requests</h1>
+
+    <button onclick="sendPostRequest('run_color_sequence')">Color Sequence</button>
+    <button onclick="sendPostRequest('run_binary_counter')">Binary Counter</button>
+
+    <script>
+        function sendPostRequest(endpoint) {
+            fetch(`http://192.168.1.102:8000/${endpoint}/`, {
+                    method: 'GET',  // Use 'POST' if your curl command was a POST request
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>

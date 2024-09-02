@@ -1,11 +1,12 @@
 import asyncio
+from itertools import cycle
 from pywizlight import discovery, PilotBuilder, wizlight
 from time import sleep
 import time
 from typing import List
 import sys
 
-from bulb_groups import get_bulb_group_macs
+from utils.bulb_groups import get_bulb_group_macs
 
 three_orb_macs = get_bulb_group_macs('three_orbs')
 
@@ -25,16 +26,31 @@ async def detect_lights() -> List[wizlight]:
 	return orb_lights
 
 async def turn_all_off(bulbs: List[wizlight]):
-	for bulb in bulbs:
-		await bulb.turn_off()
+	"""Turns off all Wiz lights concurrently."""
+	tasks = [bulb.turn_off() for bulb in bulbs]
+	await asyncio.gather(*tasks)
 
-async def change_light_state(orbs: List[wizlight], num):
+async def turn_all_on(bulbs: List[wizlight]):
+	"""Turns on all Wiz lights concurrently."""
+	tasks = [bulb.turn_on() for bulb in bulbs]
+	await asyncio.gather(*tasks)
+
+async def toggle(bulbs: List[wizlight]):
+	"""Turns on all Wiz lights concurrently."""
+	# tasks = [bulb.lightSwitch() for bulb in bulbs]
+	await asyncio.gather(bulbs[0].lightSwitch(), bulbs[1].lightSwitch(), bulbs[2].lightSwitch())
+
+async def change_light_state(orbs: List[wizlight], num: str, old_num: str):
+	tasks = []
 	for i, digit in enumerate(num):
-		if digit == "1":
-			await orbs[i].turn_on()
-		elif digit == "0":
-			await orbs[i].turn_off()
-		
+		old_digit = old_num[i]
+		if digit != old_digit:
+			if digit == "1":
+				tasks.append(orbs[i].turn_on())
+			elif digit == "0":
+				tasks.append(orbs[i].turn_off())
+	
+	await asyncio.gather(*tasks)
 
 	
 async def main_loop():
@@ -56,9 +72,11 @@ async def main_loop():
 		"111",
 	]
 
-	for num in binary_0_to_8:
-		await change_light_state(orbs, num)
-		sleep(1)
+	lastNum = "000"
+	for num in cycle(binary_0_to_8):
+		await change_light_state(orbs, num, lastNum)
+		lastNum = num
+		await asyncio.sleep(3)
 
 		
 
