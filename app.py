@@ -5,8 +5,8 @@ from starlette.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from typing import Optional
 
-import color_in_sequence
-import binary_counter
+from programs import color_cycle
+from programs import binary_counter
 
 
 app = FastAPI()
@@ -36,7 +36,7 @@ async def start_program(program_name):
     
     if program_name == "color_cycle":
         print("Starting color cycle!")
-        running_task = asyncio.create_task(color_in_sequence.main_loop())
+        running_task = asyncio.create_task(color_cycle.main_loop())
     elif program_name == "binary_counter":
         running_task = asyncio.create_task(binary_counter.main_loop())
     else:
@@ -52,8 +52,8 @@ async def stop_program():
             print("Program stopped.")
 
 
-@app.get("/run_color_sequence/")
-async def run_color_sequence() -> str:
+@app.get("/run_color_cycle/")
+async def run_color_cycle() -> str:
     """Echo parameters back in result."""
     await start_program("color_cycle")
     return "Color cycle program started."
