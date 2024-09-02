@@ -1,23 +1,13 @@
 
 # library for waiting for network operations to finish
 import asyncio 
-
-# Just for knowing what types you can enter in your IDE
+from itertools import cycle, islice
 from typing import List, Tuple 
-
-# Custom util I made for saving bulbs.
-# This function gets you the lights directly via a name
-from utils.bulb_groups import get_wiz_light_from_group
-
-# PilotBuilder makes colors and settings
-# Wizlight is how you make calls to a light
-from pywizlight import PilotBuilder, wizlight
-
-# You know this one
 from time import sleep
 
-# continually iterates through an array
-from itertools import cycle, islice
+from pywizlight import PilotBuilder, wizlight
+
+from utils.bulb_groups import get_wiz_light_from_group
 
 
 assortment_of_color_rgbs = [
@@ -132,9 +122,3 @@ async def main_loop():
 if __name__ == "__main__":
 	asyncio.run(main_loop())
 	
-	#keep below for future reference if above breaks sync
-	#loop = asyncio.new_event_loop()
-	#loop.run_until_complete(main_loop())
-
-
-
