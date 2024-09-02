@@ -37,8 +37,9 @@ async def get_wiz_light_from_group(group_name: str) -> List[wizlight]:
     bulbs = await discovery.discover_lights()
 
     lights = []
-    for bulb in bulbs:
-        if bulb.mac in mac_addresses:
-            lights.append(wizlight(bulb.ip))
-
+    for mac in mac_addresses:
+        for bulb in bulbs:
+            if bulb.mac == mac:
+                lights.append(wizlight(bulb.ip))
+                
     return lights

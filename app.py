@@ -1,15 +1,33 @@
 import asyncio
-from fastapi import FastAPI
+from typing import Optional, Tuple
+
+from fastapi import FastAPI, Body
+from pydantic import BaseModel
+from pywizlight import PilotBuilder
 from starlette.responses import FileResponse
 from starlette.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
-from typing import Optional
 
-from programs import color_cycle
-from programs import binary_counter
+from programs import color_cycle, binary_counter
+from utils.bulb_groups import get_wiz_light_from_group
+
+class LightSettings(BaseModel):
+    rgb: Optional[Tuple[int, int, int]] = None
 
 
-app = FastAPI()
+async def lifespan(_):
+    global orb_lights
+    orb_lights = await get_wiz_light_from_group('three_orbs')
+
+    global running_task
+    running_task = None
+
+    yield
+    print("shutdown")
+
+app = FastAPI(lifespan=lifespan)
+
+# Allow calls from local network browsers
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  # Adjust this based on where your HTML page is served
@@ -20,10 +38,6 @@ app.add_middleware(
 
 # Mount the static directory
 app.mount("/static", StaticFiles(directory="static"), name="static")
-
-
-global running_task
-running_task = None
 
 async def start_program(program_name):
     global running_task
@@ -36,9 +50,9 @@ async def start_program(program_name):
     
     if program_name == "color_cycle":
         print("Starting color cycle!")
-        running_task = asyncio.create_task(color_cycle.main_loop())
+        running_task = asyncio.create_task(color_cycle.main_loop(orb_lights=orb_lights))
     elif program_name == "binary_counter":
-        running_task = asyncio.create_task(binary_counter.main_loop())
+        running_task = asyncio.create_task(binary_counter.main_loop(orb_lights=orb_lights))
     else:
         print("Unknown program.")
 
@@ -63,7 +77,26 @@ async def run_color_cycle() -> str:
 async def run_binary_counter() -> str:
     """Start the on-off program."""
     await start_program("binary_counter")
-    return "On-off program started."
+    return "binary_counter_started"
+
+
+@app.get("/turn_off_orbs/")
+async def turn_off_():
+    await stop_program()
+    tasks = [bulb.turn_off() for bulb in orb_lights]
+    await asyncio.gather(*tasks)
+
+@app.post("/turn_on_orbs/")
+async def turn_on_orbs(light_settings: LightSettings = Body(...)):
+    await stop_program()
+    if light_settings.rgb:
+        rgb_pilot = PilotBuilder(rgb=light_settings.rgb)
+        tasks = [bulb.turn_on(rgb_pilot) for bulb in orb_lights]
+    else:
+        tasks = [bulb.turn_on() for bulb in orb_lights]
+
+    await asyncio.gather(*tasks)
+
 
 @app.get("/greet/")
 async def greet(name: Optional[str] = None, age: Optional[int] = None):
@@ -71,7 +104,6 @@ async def greet(name: Optional[str] = None, age: Optional[int] = None):
         greeting = f"Hello, {name}!"
     else:
         greeting = "Hello, stranger!"
-
     if age:
         return f"{greeting} You are {age} years old."
     else:
