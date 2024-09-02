@@ -42,7 +42,7 @@ rgb_palette = [
 	(255, 0, 0)
 ]
 
-new_palette = [
+halloween_palette = [
 	(88, 0, 255),
 	(255, 100, 0),
 	(25, 255, 0)
@@ -89,9 +89,9 @@ async def run_cycle_for_all_lights(bulbs: List[wizlight], palette):
 	while True:
 		await asyncio.gather(color_cycle(bulbs[0], palette[i]), color_cycle(bulbs[1], palette[j]), color_cycle(bulbs[2], palette[k]))
 		await asyncio.sleep(2)
-		i = i+1 if i<len(rgb_palette)-1 else 0
-		j = j+1 if j<len(rgb_palette)-1 else 0
-		k = k+1 if k<len(rgb_palette)-1 else 0
+		i = i+1 if i<len(palette)-1 else 0
+		j = j+1 if j<len(palette)-1 else 0
+		k = k+1 if k<len(palette)-1 else 0
 		
 async def change_light_state(orbs: List[wizlight], num):
 	for i, digit in enumerate(num):
@@ -117,7 +117,7 @@ async def main_loop():
 	while True:
 		#await color_sequence(orb_lights)
 		#await color_sequence_in_sync(orb_lights)
-		await run_cycle_for_all_lights(orb_lights, rgb_palette)
+		await run_cycle_for_all_lights(orb_lights, brighter_palette)
 		
 if __name__ == "__main__":
 	asyncio.run(main_loop())
