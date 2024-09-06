@@ -86,6 +86,17 @@ async def turn_off_():
     tasks = [bulb.turn_off() for bulb in orb_lights]
     await asyncio.gather(*tasks)
 
+
+@app.get("/get_programs/")
+async def get_programs():
+    return {
+        "programs": [
+            "run_color_cycle",
+            "run_binary_counter",
+            "turn_off_orbs"
+        ]
+    }
+
 @app.post("/turn_on_orbs/")
 async def turn_on_orbs(light_settings: LightSettings = Body(...)):
     await stop_program()

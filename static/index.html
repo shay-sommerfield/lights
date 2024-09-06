@@ -8,12 +8,14 @@
 <body>
     <h1>Send POST Requests</h1>
 
-    <button onclick="sendPostRequest('run_color_sequence')">Color Sequence</button>
+    <button onclick="sendPostRequest('run_color_cycle')">Color Sequence</button>
     <button onclick="sendPostRequest('run_binary_counter')">Binary Counter</button>
+    <button onclick="sendPostRequest('turn_off_orbs')">Turn off orbs</button>
+
 
     <script>
         function sendPostRequest(endpoint) {
-            fetch(`http://192.168.1.102:8000/${endpoint}/`, {
+            fetch(`http://localhost:8000/${endpoint}/`, {
                     method: 'GET',  // Use 'POST' if your curl command was a POST request
                     headers: {
                         'Content-Type': 'application/json',
