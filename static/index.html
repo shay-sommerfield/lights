@@ -10,12 +10,45 @@
     <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Three Orb Control Panel</h1>
+    <div id="wrapper">
+        <h1>Three Orb Control Panel</h1>
 
-    <button onclick="sendPostRequest('run_color_cycle')">Color Sequence</button>
-    <button onclick="sendPostRequest('run_binary_counter')">Binary Counter</button>
-    <button onclick="sendPostRequest('turn_off_orbs')">Turn off orbs</button>
+        <div id="button-container"></div> <!-- This is where buttons will be added -->
+    </div>
+    <script>
+        // Function to fetch programs from backend and generate buttons
+        async function generateButtons() {
+            try {
+                // Fetch the programs from the backend
+                const response = await fetch('http://127.0.0.1:8000/get_programs/')
+                const programs = await response.json();
 
+                // Get the container where buttons will be added
+                const buttonContainer = document.getElementById('button-container');
+
+                // Loop through the items and create a button for each one
+                // Programs are expected to have a name and a function to call
+                programs.forEach(program => {
+                    // Create a new button element
+                    const button = document.createElement('button');
+                    button.innerText = program.name;  
+
+                    // Add an event listener for the button click
+                    button.addEventListener('click', function() {
+                        sendPostRequest(program.func);
+                    });
+
+                    // Append the button to the container
+                    buttonContainer.appendChild(button);
+                });
+            } catch (error) {
+                console.error('Error fetching items:', error);
+            }
+        }
+
+        // Call the function to fetch program and generate buttons on page load
+        window.onload = generateButtons;
+    </script>
 
     <script>
         function sendPostRequest(endpoint) {
@@ -34,5 +67,6 @@
             });
         }
     </script>
+
 </body>
 </html>
