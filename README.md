@@ -47,26 +47,38 @@ Run `./start_server.sh` to start a localhost server
 ### Testing the server is up
 In another terminal, run the following to test the server:
 ```
-curl http://127.0.0.1:8000/greet/
+curl http://localhost:8000/greet/
 ```
 You should receive a nice message. 
 
-### Other server methods
+### Raspberry pi vs localhost
 
-#### GET methods
+The raspberry pi has a static ip address of `192.168.1.123`. 
+So replace `localhost` in examples below to control the raspberry pi server instead. 
+
+You can run a localhost server while the raspberry pi is up as long as the pi is not
+running a program. So first turn off the orbs on the pi and then start your localhost server. 
+
+```
+curl http://192.168.1.123:8000/turn_off_orbs/
+./start_server.sh
+```
+### GET methods
 
 From a high level, a get request just allows us to call a function on a server
 without any arguments. So the following is like calling `run_color_cycle()` in a python script:
 
 ```
-curl http://127.0.0.1:8000/run_color_cycle/
+curl http://localhost:8000/run_color_cycle/
 ```
 
-The following are also supported:
+The following are all supported:
+- `run_color_cycle`
 - `run_binary_counter`
 - `turn_off_orbs`
+- `get_programs`
 
-#### Post methods
+### Post methods
 
 From a high level, post requests are used to pass arguments to a server function. In this case, we pass the
 arguments as a JSON object.
@@ -80,3 +92,7 @@ Because I made the `rgb` field optional, passing an empty object just turns all 
 ```
 curl -X POST "http://127.0.0.1:8000/turn_on_orbs/" -H "Content-Type: application/json" -d '{}'
 ```
+
+### Frontend
+A simple frontend is served from `http://localhost:8000/`
+The file is located at `static/index.html`

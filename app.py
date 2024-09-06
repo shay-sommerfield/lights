@@ -46,12 +46,13 @@ async def start_program(program_name):
         try:
             await running_task
         except asyncio.CancelledError:
-            print(f"Previous program {program_name} canceled.")
+            print(f"Previous program cancelled. Now running: {program_name}.")
     
     if program_name == "color_cycle":
         print("Starting color cycle!")
         running_task = asyncio.create_task(color_cycle.main_loop(orb_lights=orb_lights))
     elif program_name == "binary_counter":
+        print("Starting binary counter!")
         running_task = asyncio.create_task(binary_counter.main_loop(orb_lights=orb_lights))
     else:
         print("Unknown program.")
@@ -85,6 +86,22 @@ async def turn_off_():
     await stop_program()
     tasks = [bulb.turn_off() for bulb in orb_lights]
     await asyncio.gather(*tasks)
+
+
+@app.get("/get_programs/")
+async def get_programs():
+    programs = [
+            {"func": "run_color_cycle", 
+             "name": "Color Sequence"},
+
+            {"func": "run_binary_counter", 
+             "name": "Binary Counter"},
+             
+            {"func": "turn_off_orbs", 
+             "name": "Turn off orbs"}
+            ]
+    return programs
+        
 
 @app.post("/turn_on_orbs/")
 async def turn_on_orbs(light_settings: LightSettings = Body(...)):

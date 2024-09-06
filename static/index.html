@@ -4,16 +4,55 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple POST Requests</title>
+    <link rel="stylesheet" href="./style.css"/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet">
 </head>
 <body>
-    <h1>Send POST Requests</h1>
+    <div id="wrapper">
+        <h1>Three Orb Control Panel</h1>
 
-    <button onclick="sendPostRequest('run_color_sequence')">Color Sequence</button>
-    <button onclick="sendPostRequest('run_binary_counter')">Binary Counter</button>
+        <div id="button-container"></div> <!-- This is where buttons will be added -->
+    </div>
+    <script>
+        // Function to fetch programs from backend and generate buttons
+        async function generateButtons() {
+            try {
+                // Fetch the programs from the backend
+                const response = await fetch('http://127.0.0.1:8000/get_programs/')
+                const programs = await response.json();
+
+                // Get the container where buttons will be added
+                const buttonContainer = document.getElementById('button-container');
+
+                // Loop through the items and create a button for each one
+                // Programs are expected to have a name and a function to call
+                programs.forEach(program => {
+                    // Create a new button element
+                    const button = document.createElement('button');
+                    button.innerText = program.name;  
+
+                    // Add an event listener for the button click
+                    button.addEventListener('click', function() {
+                        sendPostRequest(program.func);
+                    });
+
+                    // Append the button to the container
+                    buttonContainer.appendChild(button);
+                });
+            } catch (error) {
+                console.error('Error fetching items:', error);
+            }
+        }
+
+        // Call the function to fetch program and generate buttons on page load
+        window.onload = generateButtons;
+    </script>
 
     <script>
         function sendPostRequest(endpoint) {
-            fetch(`http://192.168.1.102:8000/${endpoint}/`, {
+            fetch(`http://192.168.1.123:8000/${endpoint}/`, {
                     method: 'GET',  // Use 'POST' if your curl command was a POST request
                     headers: {
                         'Content-Type': 'application/json',
@@ -28,5 +67,6 @@
             });
         }
     </script>
+
 </body>
 </html>

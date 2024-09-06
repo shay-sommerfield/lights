@@ -1,0 +1,25 @@
+html {
+    background-color: #FFE5CF;
+}
+
+body {
+    font-family: "Abril Fatface", serif;
+    color: #33372C;
+}
+#wrapper{
+    width: 364px;
+}
+#button-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+button {
+    background-color: #FF885B;
+    color: #33372C;
+    border: #557C56 dashed 2px;
+    border-radius: 6px;
+    height: 2.5rem;
+    margin: 2px;
+}
+  
