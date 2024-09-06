@@ -52,7 +52,7 @@
 
     <script>
         function sendPostRequest(endpoint) {
-            fetch(`http://localhost:8000/${endpoint}/`, {
+            fetch(`http://192.168.1.123:8000/${endpoint}/`, {
                     method: 'GET',  // Use 'POST' if your curl command was a POST request
                     headers: {
                         'Content-Type': 'application/json',
