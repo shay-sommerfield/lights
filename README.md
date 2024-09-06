@@ -61,7 +61,7 @@ running a program. So first turn off the orbs on the pi and then start your loca
 
 ```
 curl http://192.168.1.123:8000/turn_off_orbs/
-./start.sh
+./start_server.sh
 ```
 ### GET methods
 
