@@ -12,7 +12,7 @@ def save_bulb_group(group_name: str, mac_array: List[str]):
         sys.exit(1)
         
     # Write the array to a JSON file
-    file_path = f'../bulb_groups/{group_name}.json'
+    file_path = f'bulb_groups/{group_name}.json'
     if os.path.exists(file_path):
         sys.stderr.write((f'\nError:\n{file_path} already exists. Not saving bulbs\n'))
         sys.exit(1)
