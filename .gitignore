@@ -1,3 +1,6 @@
 env/
 *.pyc
 settings.json
+
+# Dependency directories
+node_modules/
