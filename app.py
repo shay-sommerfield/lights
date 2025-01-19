@@ -1,5 +1,6 @@
 import asyncio
 from typing import Optional, Tuple
+import json
 
 from fastapi import FastAPI, Body
 from pydantic import BaseModel
@@ -100,7 +101,7 @@ async def get_programs():
             {"func": "turn_off_orbs", 
              "name": "Turn off orbs"}
             ]
-    return programs
+    return json.dumps(programs)
         
 
 @app.post("/turn_on_orbs/")

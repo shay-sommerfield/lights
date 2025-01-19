@@ -24,7 +24,9 @@ app.get("/", async (req, res) => {
   try {
     // Fetch the programs from the backend in order to generate buttons
     const response = await axios.get('http://127.0.0.1:8000/get_programs/');
-    let events = JSON.parse(response);
+    /*response.data is of the form: 
+    [{"func": "run_color_cycle", "name": "Color Sequence"},...]*/
+    const events = JSON.parse(response.data);
     res.render("index.ejs", { events: events});
   } catch (error) {
     res.render("index.ejs", {events: ["No Functions Available"]});
@@ -37,8 +39,9 @@ app.post("/exec", async (req, res) => {
   const program = req.body.button;
   console.log(program);
   try {
-    const result = await axios.get(API_URL + `/${program}`, config);
-    res.render("index.ejs", { content: JSON.stringify(result.data) });
+    const result = await axios.get(API_URL + `/${program}/`, config);
+    console.log(result.data);
+    res.render("index.ejs", { events: events, res: JSON.stringify(result.data) });
   } catch (error) {
     res.render("index.ejs", { content: JSON.stringify(error) });
   }

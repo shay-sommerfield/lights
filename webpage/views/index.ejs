@@ -15,10 +15,13 @@
         <form action="/exec" method="POST" class="buttons">
             <% if (locals.events) { %>
                 <% events.forEach(event => { %>
-                    <button name="button" type="submit" value=<%=event%>><%=event%></button>
+                    <button name="button" type="submit" value=<%=event.func%>><%=event.name%></button>
                 <% }) %>
             <% } %>
         </form>
+        <% if (locals.res) { %>
+            <h2><%=res%></h2>
+        <% } %>
     </div>
 </body>
 </html>
