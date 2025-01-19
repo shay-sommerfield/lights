@@ -19,4 +19,4 @@ set -euo pipefail
 
 # uvicorn starts our 'app.py' server on port 8000 of 127.0.0.1
 # append --host 0.0.0.0 to allow machines on the local network to send requests
-uvicorn app:app --port 8000 # --host 0.0.0.0
+uvicorn app:app --reload --port 8000 # --host 0.0.0.0
