@@ -66,6 +66,28 @@ curl http://localhost:8000/greet/
 ```
 You should receive a nice message. 
 
+### Updating the code on the raspberry pi
+ssh into it using the `Raspberry Pi LIGHT-SERVER` credentials
+```
+ssh shay@192.168.1.123
+```
+
+Then git pull the code directory to the latest master
+and restart the systemctl light service.
+```
+cd lights
+git pull
+sudo systemctl restart light-server.service
+```
+
+#### Systemctl
+`systemctl` ensures that services (background programs without UIs)
+start up when the raspberry pi boots and can be configured to restart 
+if the service crashes. 
+
+So in the above case `systemctl restart light-server.service` restarts
+our server to include the code update. 
+
 ### Raspberry pi vs localhost
 
 The raspberry pi has a static ip address of `192.168.1.123`. 
