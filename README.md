@@ -31,6 +31,21 @@ You're all set up baby!
 python color_change.py
 ```
 
+## Adding new bulbs
+The `utils/discover.py` script will detect lights and group them. 
+Turn off all lights except the lights you want to group. 
+
+Run without arguments to ensure that only the lights you want are detected:
+```bash
+./utils/discover.py
+```
+
+Run with the save argument and a group name to add as a json in 
+the bulb groups directory:
+```bash
+./utils/discover.py --save living_room
+```
+
 ## Light Programs locally
 A program dynamically updates the lights and generally continues running forever. 
 These all live in the `programs` directory.
