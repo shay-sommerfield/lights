@@ -47,20 +47,26 @@ const loopSendMessages = async () => {
             }
         };
 
-        // Convert JSON to string and then to a buffer
-        const message = Buffer.from(JSON.stringify(jsonPayload));
+        // Function to send messages to all IP addresses and handle the response
+        const sendMessagesToAllIPs = async (jsonPayload) => {
+            // Convert JSON to string and then to a buffer
+            const message = Buffer.from(JSON.stringify(jsonPayload));
 
-        // Send the message to all IPs
-        const sendPromises = ipAddresses.map(ip => sendUdpMessage(message, ip, SERVER_PORT));
+            // Send the message to all IPs
+            const sendPromises = ipAddresses.map(ip => sendUdpMessage(message, ip, SERVER_PORT));
 
-        try {
-            await Promise.all(sendPromises);
-        } catch (err) {
-            console.error('Failed to send messages:', err);
-        }
+            try {
+                await Promise.all(sendPromises);
+            } catch (err) {
+                console.error('Failed to send messages:', err);
+            }
 
-        // Wait for 1 second before sending the next set of messages
-        await delay(1000);
+            // Wait for 1 second before sending the next set of messages
+            await delay(1000);
+            console.log("Sent message to all IPs");
+        };
+
+        await sendMessagesToAllIPs(jsonPayload);
     }
 };
 
