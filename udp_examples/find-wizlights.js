@@ -1,16 +1,14 @@
 import dgram from 'dgram';
 
-
 const BROADCAST_ADDR = '255.255.255.255';
 const WIZ_PORT = 38899;
-const WAIT_TIME = 3000; // Adjust based on needs
+const WAIT_TIME = 3000;
 
 export async function findWizLights(waitTime = WAIT_TIME) {
     return new Promise((resolve, reject) => {
         const socket = dgram.createSocket('udp4');
         const discoveredBulbs = new Map();
 
-        // Message to send (WiZ discovery request)
         const message = Buffer.from(JSON.stringify({
             method: "getSystemConfig",
             params: {}
@@ -28,7 +26,7 @@ export async function findWizLights(waitTime = WAIT_TIME) {
                         model: result.moduleName || "Unknown"
                     });
 
-                    console.log(`Discovered: ${rinfo.address} (MAC: ${result.mac}, Model: ${result.moduleName})`);
+                    // console.log(`Discovered: ${rinfo.address} (MAC: ${result.mac}, Model: ${result.moduleName})`);
                 }
             } catch (err) {
                 console.error("Error parsing response:", err);
@@ -41,7 +39,6 @@ export async function findWizLights(waitTime = WAIT_TIME) {
             reject(err);
         });
 
-        // Enable broadcasting
         socket.bind(() => {
             socket.setBroadcast(true);
             socket.send(message, 0, message.length, WIZ_PORT, BROADCAST_ADDR, (err) => {
@@ -55,7 +52,6 @@ export async function findWizLights(waitTime = WAIT_TIME) {
             });
         });
 
-        // Wait for responses, then close socket and return results
         setTimeout(() => {
             socket.close();
             resolve([...discoveredBulbs.values()]);
@@ -63,9 +59,39 @@ export async function findWizLights(waitTime = WAIT_TIME) {
     });
 }
 
-// Run the discovery function
-findWizLights().then((bulbs) => {
-    console.log("Discovered bulbs:", bulbs);
-}).catch((err) => {
-    console.error("Discovery failed:", err);
-});
+
+
+function statusMsgFromId(id) {
+    return Buffer.from(JSON.stringify({
+        "id": id,
+        "method":"getPilot",
+        "params":{}
+    }));
+} 
+
+export async function getOnBulbs(ips, waitTime = WAIT_TIME) {
+    return new Promise((resolve, reject) => {
+        const socket = dgram.createSocket('udp4');
+
+        
+        const onBulbs = new Map();
+        socket.on('message', (msg, rinfo) => {
+            console.log(`Received response from ${rinfo.address}: ${msg}`);
+            const data = JSON.parse(msg.toString())
+            if (data.method === "getPilot" && data.result.state === true) {
+                onBulbs.set(rinfo.address, data.id)
+            }
+        });
+
+        socket.on('error', (err) => {
+            console.error("Socket error:", err);
+            socket.close();
+            reject(err);
+        });
+
+        setTimeout(() => {
+            socket.close();
+            resolve(onBulbs);
+        }, waitTime);
+    });
+}
