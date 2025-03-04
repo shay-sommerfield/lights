@@ -69,17 +69,49 @@ function statusMsgFromId(id) {
     }));
 } 
 
-export async function getOnBulbs(ips, waitTime = WAIT_TIME) {
+export async function getOnBulbs(waitTime = WAIT_TIME) {
+
+    const discoverdBulbs = await findWizLights();
+
+    const ips = discoverdBulbs.map(val => val.ip);
     return new Promise((resolve, reject) => {
         const socket = dgram.createSocket('udp4');
+        const onBulbs = []
+        const pendingResponses = new Set(ips); // Track which bulbs we are waiting for
 
-        
-        const onBulbs = new Map();
+        const message = JSON.stringify({
+            method: "getPilot",
+            params: {}
+        });
+
+         // Timeout to ensure resolution even if some bulbs don't respond
+        let timeoutId = setTimeout(() => {
+            socket.close();
+            resolve(onBulbs);
+        }, waitTime);
+
+        // Listen for responses
         socket.on('message', (msg, rinfo) => {
-            console.log(`Received response from ${rinfo.address}: ${msg}`);
-            const data = JSON.parse(msg.toString())
-            if (data.method === "getPilot" && data.result.state === true) {
-                onBulbs.set(rinfo.address, data.id)
+            try {
+                const data = JSON.parse(msg.toString());
+
+                if (data.method === "getPilot" && data.result?.state === true) {
+                    console.log(data);
+                    onBulbs.push(rinfo.address);
+                }
+
+                // Remove IP from pending responses
+                pendingResponses.delete(rinfo.address);
+
+                // If all expected responses are received, close early
+                if (pendingResponses.size === 0) {
+                    clearTimeout(timeoutId); // Cancel the timeout
+                    socket.close();
+                    console.log(onBulbs);
+                    resolve(onBulbs);
+                }
+        } catch (err) {
+                console.error(`Error parsing response from ${rinfo.address}:`, err);
             }
         });
 
@@ -89,9 +121,14 @@ export async function getOnBulbs(ips, waitTime = WAIT_TIME) {
             reject(err);
         });
 
-        setTimeout(() => {
-            socket.close();
-            resolve(onBulbs);
-        }, waitTime);
+        // Send request to each bulb
+        ips.forEach(ip => {
+            socket.send(message, 0, message.length, WIZ_PORT, ip, (err) => {
+                if (err) {
+                    console.error(`Failed to send message to ${ip}:`, err);
+                    pendingResponses.delete(ip);
+                }
+            });
+        });
     });
 }
