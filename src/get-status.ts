@@ -1,4 +1,4 @@
-import { findWizLights, getOnBulbs, Light, saveOnBulbsToGroup, getLightsFromBulbGroup } from './find-wizlights';
+import { findWizLights, getOnBulbsInfo, Light, savePartyBulbsToGroup, getLightsFromBulbGroup } from './find-wizlights';
 
 async function discover() {
 

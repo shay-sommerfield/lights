@@ -1,6 +1,7 @@
 import dgram from 'dgram';
 import * as fs from 'fs';
 import { join } from 'path';
+import * as readline from "readline";
 
 const BROADCAST_ADDR = '255.255.255.255';
 const WIZ_PORT = 38899;
@@ -15,20 +16,28 @@ interface WizBulbInfo {
 
 
 
-interface WizRequest {
+interface WizBaseRequest {
     id: number;
     method: string;
     params: Object;
 }
 
-interface WizStateRequest extends WizRequest {
+interface WizStateRequest extends WizBaseRequest {
     method: "setState";
     params: {
         state: boolean;
     }
 }
 
-interface WizRgbRequest extends WizRequest {
+interface WizTempRequest extends WizBaseRequest {
+    method: "setPilot";
+    params: {
+        temp: number;
+        dimming: number;
+    }
+}
+
+interface WizRgbRequest extends WizBaseRequest {
     method: "setPilot";
     params: {
         r: number;
@@ -37,6 +46,8 @@ interface WizRgbRequest extends WizRequest {
         dimming: number;
     }
 }
+
+type WizRequest = WizStateRequest | WizRgbRequest | WizTempRequest;
 
 // Define expected response structure
 interface WizResponse {
@@ -70,6 +81,18 @@ export class Light {
         sendMessage(this.ip, onMsg)
     }
 
+    async turnOnWarmWhite() {
+        const onMsg: WizTempRequest = {
+            id: 1,
+            method: "setPilot",
+            params: {
+                temp: 3000,
+                dimming: 75
+            }
+        }
+        sendMessage(this.ip, onMsg)
+    }
+
     async turnOff() {
         const offMsg: WizStateRequest = {
             id: 1,
@@ -88,7 +111,7 @@ export class Light {
  * @param waitTime - Time in milliseconds to wait for responses.
  * @returns Promise resolving to an array of IP addresses for bulbs that are on.
  */
-export async function sendMessage(ip: string, message: WizRgbRequest | WizStateRequest, waitTime: number = WAIT_TIME): Promise<WizResponse> {
+export async function sendMessage(ip: string, message: WizRequest, waitTime: number = WAIT_TIME): Promise<WizResponse> {
 
     return new Promise((resolve, reject) => {
         const socket = dgram.createSocket('udp4');
@@ -103,7 +126,6 @@ export async function sendMessage(ip: string, message: WizRgbRequest | WizStateR
             try {
                 const data: WizResponse = JSON.parse(msg.toString());
 
-                console.log("Light responded with ", data);
                 clearTimeout(timeoutId);
                 socket.close();
                 resolve(data)
@@ -213,7 +235,7 @@ export function partyFilter(data: WizResponse): boolean {
  * @returns Promise resolving to an array of IP addresses for bulbs that are on.
  */
 
-export async function getOnBulbs(
+export async function getOnBulbsInfo(
     filterFunction: LightFilterFunction = (data) => data.method === "getPilot" && data.result?.state === true,
     waitTime: number = WAIT_TIME, 
 ): Promise<WizBulbInfo[]> {
@@ -277,18 +299,65 @@ export async function getOnBulbs(
     });
 }
 
+export async function getOnBulbs(
+    filterFunction: LightFilterFunction = (data) => data.method === "getPilot" && data.result?.state === true,
+    waitTime: number = WAIT_TIME, 
+): Promise<Light[]> {
+    const availableLightInfo = await getOnBulbsInfo(filterFunction, waitTime);
+    return availableLightInfo.map((light) => {
+            return new Light(light.ip);
+    });
 
-export async function saveOnBulbsToGroup(name: string) {
+}
 
-    const info = await getOnBulbs();
+export function lightsFromWizInfo(info: WizBulbInfo[]) {
+    return info.map((light) => {
+        return new Light(light.ip);
+        });
+}
+
+function askQuestion(rl: any, question: string): Promise<string> {
+    return new Promise((resolve) => {
+        rl.question(question, (answer:string) => resolve(answer.trim().toLowerCase()));
+    });
+}
+
+
+export async function savePartyBulbsToGroup() {
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+
+
+    const info = await getOnBulbsInfo(partyFilter);
+    const lights = lightsFromWizInfo(info);
+    lights.forEach(light => light.turnOnWarmWhite())
+
+    console.log(`Found ${lights.length} lights in party mode`)
+
+    const response = await askQuestion(rl, "All party lights turned to warm white. Do you want to save these lights to a group? (y/n): ");
+    
+    let userInputName = undefined;
+    if (response === "y") {
+        userInputName = await askQuestion(rl, "Enter the desired group name: ");
+        console.log("You entered:", userInputName);
+    }
+
+    rl.close();
+
+    if(!userInputName) return; // Safety
+
     const macs = info.map((bulb) => bulb.mac);
-    const file = `../bulb_groups/${name}.json`;
+    const file = `../bulb_groups/${userInputName}.json`;
     const filePath = join(__dirname, file);
 
     fs.writeFileSync(filePath, JSON.stringify(macs), "utf-8");
 
-    console.log(`Successfully saved ${name} group to ${filePath}`);
+    console.log(`Successfully saved ${userInputName} group to ${filePath}`);
 }
+
 
 export async function getLightsFromBulbGroup(name: string): Promise<Light[]> {
 

@@ -1,14 +1,16 @@
-import { findWizLights, getOnBulbs, Light, saveOnBulbsToGroup, getLightsFromBulbGroup, partyFilter } from './find-wizlights';
+import { findWizLights, getOnBulbs, Light, savePartyBulbsToGroup, getLightsFromBulbGroup, partyFilter } from './find-wizlights';
+import * as readline from "readline";
 
-async function discover() {
+// Promise.resolve()
+//     .then(() => savePartyBulbsToGroup())
+//     .catch(console.error);
 
-    const light_info = await getOnBulbs(partyFilter);
-    light_info.forEach((light) => {
-        console.log(light)
-})
+
+async function main() {
+    const lights = await getLightsFromBulbGroup('office');
+    console.log(lights);
+    await Promise.all(lights.map(lights => lights.turnOn()));
 }
-
-// sendMsg(onMsg)
 Promise.resolve()
-    .then(() => discover())
+    .then(() => main())
     .catch(console.error);
