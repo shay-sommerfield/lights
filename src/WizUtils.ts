@@ -4,10 +4,46 @@ const BROADCAST_ADDR = '255.255.255.255';
 const WIZ_PORT = 38899;
 const WAIT_TIME = 3000;
 
-export async function findWizLights(waitTime = WAIT_TIME) {
+// Define types for discovered bulbs
+interface WizBulbInfo {
+    ip: string;
+    mac: string;
+    model: string;
+}
+
+// Define expected response structure
+interface WizResponse {
+    method: string;
+    result?: {
+        mac?: string;
+        moduleName?: string;
+        state?: boolean;
+    };
+}
+
+class Light {
+    ip: string;
+    mac: string;
+    constructor(info: WizBulbInfo){
+        this.ip = info.ip;
+        this.mac = info.mac;
+    }
+
+    async turnOn() {
+        
+    }
+}
+
+
+/**
+ * Finds Wiz lights on the network via UDP broadcast.
+ * @param waitTime - Time in milliseconds to wait for responses.
+ * @returns Promise resolving to an array of discovered WizBulb objects.
+ */
+export async function findWizLights(waitTime: number = WAIT_TIME): Promise<WizBulbInfo[]> {
     return new Promise((resolve, reject) => {
         const socket = dgram.createSocket('udp4');
-        const discoveredBulbs = new Map();
+        const discoveredBulbs: Map<string, WizBulbInfo> = new Map();
 
         const message = Buffer.from(JSON.stringify({
             method: "getSystemConfig",
@@ -16,17 +52,14 @@ export async function findWizLights(waitTime = WAIT_TIME) {
 
         socket.on('message', (msg, rinfo) => {
             try {
-                const response = JSON.parse(msg.toString());
-                const { result } = response;
+                const response: WizResponse = JSON.parse(msg.toString());
 
-                if (result && result.mac) {
+                if (response.result?.mac) {
                     discoveredBulbs.set(rinfo.address, {
                         ip: rinfo.address,
-                        mac: result.mac,
-                        model: result.moduleName || "Unknown"
+                        mac: response.result.mac,
+                        model: response.result.moduleName || "Unknown"
                     });
-
-                    // console.log(`Discovered: ${rinfo.address} (MAC: ${result.mac}, Model: ${result.moduleName})`);
                 }
             } catch (err) {
                 console.error("Error parsing response:", err);
@@ -59,44 +92,49 @@ export async function findWizLights(waitTime = WAIT_TIME) {
     });
 }
 
-
-
-function statusMsgFromId(id) {
+/**
+ * Generates a UDP status message for Wiz bulbs.
+ * @param id - Unique identifier for the request.
+ * @returns Buffer containing the status request message.
+ */
+function statusMsgFromId(id: number): Buffer {
     return Buffer.from(JSON.stringify({
-        "id": id,
-        "method":"getPilot",
-        "params":{}
+        id: id,
+        method: "getPilot",
+        params: {}
     }));
-} 
+}
 
-export async function getOnBulbs(waitTime = WAIT_TIME) {
+/**
+ * Retrieves all Wiz bulbs that are currently turned on.
+ * @param waitTime - Time in milliseconds to wait for responses.
+ * @returns Promise resolving to an array of IP addresses for bulbs that are on.
+ */
+export async function getOnBulbs(waitTime: number = WAIT_TIME): Promise<string[]> {
+    const discoveredBulbs: WizBulbInfo[] = await findWizLights();
+    const ips: string[] = discoveredBulbs.map(bulb => bulb.ip);
 
-    const discoverdBulbs = await findWizLights();
-
-    const ips = discoverdBulbs.map(val => val.ip);
     return new Promise((resolve, reject) => {
         const socket = dgram.createSocket('udp4');
-        const onBulbs = []
-        const pendingResponses = new Set(ips); // Track which bulbs we are waiting for
+        const onBulbs: string[] = [];
+        const pendingResponses: Set<string> = new Set(ips);
 
         const message = JSON.stringify({
             method: "getPilot",
             params: {}
         });
 
-         // Timeout to ensure resolution even if some bulbs don't respond
         let timeoutId = setTimeout(() => {
             socket.close();
             resolve(onBulbs);
         }, waitTime);
 
-        // Listen for responses
         socket.on('message', (msg, rinfo) => {
             try {
-                const data = JSON.parse(msg.toString());
+                const data: WizResponse = JSON.parse(msg.toString());
 
                 if (data.method === "getPilot" && data.result?.state === true) {
-                    console.log(data);
+                    console.log("pushing bulb")
                     onBulbs.push(rinfo.address);
                 }
 
@@ -105,12 +143,11 @@ export async function getOnBulbs(waitTime = WAIT_TIME) {
 
                 // If all expected responses are received, close early
                 if (pendingResponses.size === 0) {
-                    clearTimeout(timeoutId); // Cancel the timeout
+                    clearTimeout(timeoutId);
                     socket.close();
-                    console.log(onBulbs);
                     resolve(onBulbs);
                 }
-        } catch (err) {
+            } catch (err) {
                 console.error(`Error parsing response from ${rinfo.address}:`, err);
             }
         });
