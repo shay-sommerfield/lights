@@ -131,5 +131,11 @@ curl -X POST "http://127.0.0.1:8000/turn_on_orbs/" -H "Content-Type: application
 ```
 
 ### Frontend
-A simple frontend is served from `http://localhost:8000/`
-The file is located at `static/index.html`
+The frontend is hosted by React and run through vite.
+
+To run, cd into the `react_client` folder and run the following lines:
+`npm i`
+`npm run dev`
+
+
+

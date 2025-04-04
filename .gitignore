@@ -1,3 +1,5 @@
 env/
 *.pyc
-settings.json
+settings.js
+node_modules/
+build/

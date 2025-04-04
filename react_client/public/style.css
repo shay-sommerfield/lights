@@ -6,9 +6,11 @@ body {
     font-family: "Abril Fatface", serif;
     color: #33372C;
 }
+
 #wrapper{
     width: 364px;
 }
+
 #button-container {
     display: flex;
     justify-content: space-between;
