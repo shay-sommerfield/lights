@@ -3,23 +3,27 @@ import { createTheme } from '@mui/material/styles';
 const theme = createTheme({
   palette: {
     primary: {
-      main: '##FFE5CF',
-      contrastText: '#33372C',
+      main: '#e5989b',
+      light: '#ffb4a2',
+      dark: '#b5838d',
+      contrastText: '#6d6875',
     },
     secondary: {
-      main: '#925723',
+      main: '#ffcdb2',
     },
   },
   components: {
     MuiButton: {
       styleOverrides: {
         root: ({ theme }) => ({
+            fontFamily: '"Abril Fatface", serif',
             backgroundColor: theme.palette.primary.main,
             color: theme.palette.primary.contrastText,
             border: `2px solid ${theme.palette.primary.main}`,
             '&:hover': {
               backgroundColor: theme.palette.primary.dark,
               borderColor: theme.palette.primary.dark,
+              color: theme.palette.secondary.main
             },
           }),
     },
