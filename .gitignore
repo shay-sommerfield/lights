@@ -3,3 +3,4 @@ env/
 settings.js
 node_modules/
 build/
+.env

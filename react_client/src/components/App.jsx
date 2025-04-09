@@ -11,7 +11,7 @@ function App(){
     useEffect(() => {
         const lightAPI = async () => {
         try {
-            const response = await fetch("/api/get_programs/");
+            const response = await fetch("/express/get_programs/");
             if (!response.ok) {
                 throw new Error("Failed to fetch data");
             }
@@ -33,7 +33,7 @@ function App(){
         <ThemeProvider theme={theme}>
         <Stack spacing={2} direction="row" id="button-container" color="primary">
         {gotPrograms ? programs.map((program) => (
-            <LightButton key={program.name} label={program.name} endpoint={program.func}></LightButton>
+            <LightButton key={program.name} label={program.name} endpoint={program.endpoint}></LightButton>
         )) : <Box color="primary.contrastText">No Programs Found</Box>
         }
         </Stack>
