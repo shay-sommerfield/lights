@@ -25,7 +25,8 @@ interface WizBaseRequest {
 interface WizStateRequest extends WizBaseRequest {
     method: "setState";
     params: {
-        state: boolean;
+        state?: boolean;
+        dimming?: number;
     }
 }
 
@@ -64,10 +65,17 @@ interface WizResponse {
 
 export class Light {
     ip: string;
+    _id: number;
     // mac: string;
     constructor(ip: string) {
         this.ip = ip;
         // this.mac = info.mac;
+        this._id = 0;
+    }
+
+    get id(): number {
+        this._id++;
+        return this._id;
     }
 
     async turnOn() {
@@ -78,7 +86,7 @@ export class Light {
                 state: true,
             }
         }
-        sendMessage(this.ip, onMsg)
+        await sendMessage(this.ip, onMsg)
     }
 
     async turnOnWarmWhite() {
@@ -90,7 +98,7 @@ export class Light {
                 dimming: 75
             }
         }
-        sendMessage(this.ip, onMsg)
+        await sendMessage(this.ip, onMsg)
     }
 
     async turnOff() {
@@ -101,7 +109,7 @@ export class Light {
                 state: false,
             }
         }
-        sendMessage(this.ip, offMsg)
+        await sendMessage(this.ip, offMsg)
     }
 }
 
