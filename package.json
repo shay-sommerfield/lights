@@ -5,6 +5,7 @@
   "scripts": {
     "build": "tsc",
     "clean-build": "rm build/** && npm run build",
+    "format": "prettier --write 'src/**/*.{ts,tsx,js,json,md}'",
     "get-status": "node build/get-status.js",
     "set-group": "node build/set-group.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,6 +15,7 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
   "dependencies": {
