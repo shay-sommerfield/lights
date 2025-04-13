@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "main": "discover.js",
   "scripts": {
+    "build": "tsc",
+    "set-group": "node build/set-group.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -1,6 +1,10 @@
 import dgram from 'dgram';
 
 
+/**
+ * This file contains all types and methods that pertain to directly sending UDP messages to lights.
+ */
+
 const BROADCAST_ADDR = '255.255.255.255';
 export const WIZ_PORT = 38899;
 export const WAIT_TIME = 3000;

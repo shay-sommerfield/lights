@@ -2,11 +2,14 @@
 import { findWizLights, sendMessage, WAIT_TIME, WIZ_PORT, WizBulbInfo, WizGetPilotResult, WizResponse, WizStateRequest, WizTempRequest } from './wiz-udp';
 import dgram from 'dgram';
 
-
+/**
+ * The class representation for a light. 
+ */
 export namespace WizLights {
 
     export class Light {
         ip: string;
+        /* An incrementing ID, that makes each request to a light unique **/
         _id: number;
         mac: string;
         lastStatus: Omit<WizGetPilotResult, 'mac'>;
@@ -27,7 +30,7 @@ export namespace WizLights {
 
         async turnOn() {
             const onMsg: WizStateRequest = {
-                id: 1,
+                id: this.id,
                 method: "setState",
                 params: {
                     state: true,

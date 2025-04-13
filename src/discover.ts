@@ -1,8 +1,5 @@
-import * as fs from 'fs';
-import { join } from 'path';
-import { findWizLights, WizResponse } from "./wiz-udp";
+import { findWizLights } from "./wiz-udp";
 import { WizLights} from './wizlights';
-
 
 type LightFilterFunction = (light: WizLights.Light) => boolean;
 

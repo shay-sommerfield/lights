@@ -6,6 +6,17 @@ import { WizLights } from './wizlights';
 import { findWizLights } from './wiz-udp';
 
 /**
+ * This file covers general configuration, that is, saveing and 
+ * retrieving bulbs from json files in the 'bulb_groups' directory. 
+ * 
+ * Each bulb group is saved to a json file, with the format:
+ * <group_name>.json
+ * 
+ * TODO: This all should be a small DB, like SQLITE instead of just json files. 
+ */
+
+
+/**
  * Filters for lights in party mode
  * 
  * @param light WizLights.Light
@@ -15,12 +26,19 @@ export function partyFilter(light: WizLights.Light): boolean {
     return light.lastStatus.state === true && light.lastStatus.sceneId === 4;
 }
 
+/**
+ * Sets up user input, so that the user can name a light group from the command line. 
+ */
 function askQuestion(rl: any, question: string): Promise<string> {
     return new Promise((resolve) => {
         rl.question(question, (answer: string) => resolve(answer.trim().toLowerCase()));
     });
 }
 
+/**
+ * Finds all bulbs set to party mode and saves them to a json file, with the group
+ * name specified by the user. 
+ */
 export async function savePartyBulbsToGroup() {
 
     const rl = readline.createInterface({
@@ -32,7 +50,7 @@ export async function savePartyBulbsToGroup() {
 
     console.log(`Found ${lights.length} lights in party mode`)
 
-    const response = await askQuestion(rl, "All party lights turned to warm white. Do you want to save these lights to a group? (y/n): ");
+    const response = await askQuestion(rl, "Do you want to save these lights to a group? (y/n): ");
 
     let userInputName = undefined;
     if (response === "y") {
