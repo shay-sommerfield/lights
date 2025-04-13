@@ -1,8 +1,5 @@
 
-import * as fs from 'fs';
-import { join } from 'path';
-import * as readline from "readline";
-import { findWizLights, sendMessage, WAIT_TIME, WIZ_PORT, WizBulbInfo, WizResponse, WizStateRequest, WizTempRequest } from './wiz-udp';
+import { findWizLights, sendMessage, WAIT_TIME, WIZ_PORT, WizBulbInfo, WizGetPilotResult, WizResponse, WizStateRequest, WizTempRequest } from './wiz-udp';
 import dgram from 'dgram';
 
 
@@ -11,11 +8,16 @@ export namespace WizLights {
     export class Light {
         ip: string;
         _id: number;
-        // mac: string;
-        constructor(ip: string) {
-            this.ip = ip;
-            // this.mac = info.mac;
+        mac: string;
+        lastStatus: Omit<WizGetPilotResult, 'mac'>;
+
+        constructor(info: WizBulbInfo) {
             this._id = 0;
+            this.ip = info.ip;
+            this.mac = info.mac;
+            this.lastStatus = {
+                ...info
+            }
         }
 
         get id(): number {
@@ -60,10 +62,6 @@ export namespace WizLights {
 
 
     type LightFilterFunction = (data: WizResponse) => boolean;
-
-    export function partyFilter(data: WizResponse): boolean {
-        return data.method === "getPilot" && data.result?.state === true && data.result?.sceneId === 4;
-    }
 
     /**
      * Retrieves all Wiz bulbs that are currently turned on.
@@ -138,78 +136,16 @@ export namespace WizLights {
         filterFunction: LightFilterFunction = (data) => data.method === "getPilot" && data.result?.state === true,
         waitTime: number = WAIT_TIME,
     ): Promise<Light[]> {
-        const availableLightInfo = await getOnBulbsInfo(filterFunction, waitTime);
-        return availableLightInfo.map((light) => {
-            return new Light(light.ip);
+        const onlineLightInfo = await getOnBulbsInfo(filterFunction, waitTime);
+        return onlineLightInfo.map((info) => {
+            return new Light(info);
         });
 
     }
 
-    export function lightsFromWizInfo(info: WizBulbInfo[]) {
-        return info.map((light) => {
-            return new Light(light.ip);
+    export function lightsFromWizInfo(infoArr: WizBulbInfo[]) {
+        return infoArr.map((info) => {
+            return new Light(info);
         });
-    }
-
-    function askQuestion(rl: any, question: string): Promise<string> {
-        return new Promise((resolve) => {
-            rl.question(question, (answer: string) => resolve(answer.trim().toLowerCase()));
-        });
-    }
-
-
-    export async function savePartyBulbsToGroup() {
-
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        });
-
-
-        const info = await getOnBulbsInfo(partyFilter);
-        const lights = lightsFromWizInfo(info);
-        lights.forEach(light => light.turnOnWarmWhite())
-
-        console.log(`Found ${lights.length} lights in party mode`)
-
-        const response = await askQuestion(rl, "All party lights turned to warm white. Do you want to save these lights to a group? (y/n): ");
-
-        let userInputName = undefined;
-        if (response === "y") {
-            userInputName = await askQuestion(rl, "Enter the desired group name: ");
-            console.log("You entered:", userInputName);
-        }
-
-        rl.close();
-
-        if (!userInputName) return; // Safety
-
-        const macs = info.map((bulb) => bulb.mac);
-        const file = `../bulb_groups/${userInputName}.json`;
-        const filePath = join(__dirname, file);
-
-        fs.writeFileSync(filePath, JSON.stringify(macs), "utf-8");
-
-        console.log(`Successfully saved ${userInputName} group to ${filePath}`);
-    }
-
-
-    export async function getLightsFromBulbGroup(name: string): Promise<Light[]> {
-
-        const file = `../bulb_groups/${name}.json`
-        const filePath = join(__dirname, file);
-
-        const rawData = fs.readFileSync(filePath, "utf-8");
-        const macs = JSON.parse(rawData);
-
-        const availableLightInfo = await findWizLights();
-        const lights: Light[] = [];
-        availableLightInfo.forEach((light) => {
-            if (macs.includes(light.mac)) {
-                lights.push(new Light(light.ip));
-            }
-        });
-
-        return lights;
     }
 }
