@@ -1,15 +1,14 @@
-import { findWizLights, getOnBulbsInfo, Light, savePartyBulbsToGroup, getLightsFromBulbGroup } from './find-wizlights';
+import { getLightsFromBulbGroup } from './configuration';
 
-async function discover() {
-
-    const lights = await getLightsFromBulbGroup('office');
-    console.log(lights)
-    lights.forEach((light) => {
-        light.turnOn();
-    })
+/**
+ * A main script for testing out various functionality
+ */
+async function main() {
+    const lights = await getLightsFromBulbGroup('dining');
+    lights.forEach(light => console.log(light.lastStatus));
 }
 
-// sendMsg(onMsg)
 Promise.resolve()
-    .then(() => discover())
+    .then(() => main())
     .catch(console.error);
+
