@@ -1,71 +1,12 @@
-import dgram from 'dgram';
+
 import * as fs from 'fs';
 import { join } from 'path';
 import * as readline from "readline";
-
-const BROADCAST_ADDR = '255.255.255.255';
-const WIZ_PORT = 38899;
-const WAIT_TIME = 3000;
+import { findWizLights, sendMessage, WAIT_TIME, WIZ_PORT, WizBulbInfo, WizResponse, WizStateRequest, WizTempRequest } from './wiz-udp';
+import dgram from 'dgram';
 
 
-namespace WizLights {
-
-
-    // Define types for discovered bulbs
-    interface WizBulbInfo {
-        ip: string;
-        mac: string;
-        model: string;
-    }
-
-
-
-    interface WizBaseRequest {
-        id: number;
-        method: string;
-        params: Object;
-    }
-
-    interface WizStateRequest extends WizBaseRequest {
-        method: "setState";
-        params: {
-            state?: boolean;
-            dimming?: number;
-        }
-    }
-
-    interface WizTempRequest extends WizBaseRequest {
-        method: "setPilot";
-        params: {
-            temp: number;
-            dimming: number;
-        }
-    }
-
-    interface WizRgbRequest extends WizBaseRequest {
-        method: "setPilot";
-        params: {
-            r: number;
-            g: number;
-            b: number;
-            dimming: number;
-        }
-    }
-
-    type WizRequest = WizStateRequest | WizRgbRequest | WizTempRequest;
-
-    // Define expected response structure
-    interface WizResponse {
-        method: string;
-        result?: {
-            mac?: string;
-            moduleName?: string;
-            state?: boolean;
-            rssi?: number;
-            sceneId?: number;
-            dimming?: number;
-        };
-    }
+export namespace WizLights {
 
     export class Light {
         ip: string;
@@ -118,123 +59,6 @@ namespace WizLights {
     }
 
 
-    /**
-     * Retrieves all Wiz bulbs that are currently turned on.
-     * @param waitTime - Time in milliseconds to wait for responses.
-     * @returns Promise resolving to an array of IP addresses for bulbs that are on.
-     */
-    export async function sendMessage(ip: string, message: WizRequest, waitTime: number = WAIT_TIME): Promise<WizResponse> {
-
-        return new Promise((resolve, reject) => {
-            const socket = dgram.createSocket('udp4');
-
-
-            let timeoutId = setTimeout(() => {
-                socket.close();
-                console.error(`Bulb at ${ip} failed to respond before timing out`);
-            }, waitTime);
-
-            socket.on('message', (msg, rinfo) => {
-                try {
-                    const data: WizResponse = JSON.parse(msg.toString());
-
-                    clearTimeout(timeoutId);
-                    socket.close();
-                    resolve(data)
-                } catch (err) {
-                    console.error(`Error parsing response from ${rinfo.address}:`, err);
-                }
-            });
-
-            socket.on('error', (err) => {
-                console.error("Socket error:", err);
-                socket.close();
-                reject(err);
-            });
-
-            // Send request to each bulb
-            const bufferMsg = Buffer.from(JSON.stringify(message));
-            socket.send(bufferMsg, 0, bufferMsg.length, WIZ_PORT, ip, (err) => {
-                if (err) {
-                    console.error(`Failed to send message to ${ip}:`, err);
-                }
-            });
-
-        });
-    }
-
-
-    /**
-     * Finds Wiz lights on the network via UDP broadcast.
-     * @param waitTime - Time in milliseconds to wait for responses.
-     * @returns Promise resolving to an array of discovered WizBulb objects.
-     */
-    export async function findWizLights(waitTime: number = WAIT_TIME): Promise<WizBulbInfo[]> {
-        return new Promise((resolve, reject) => {
-            const socket = dgram.createSocket('udp4');
-            const discoveredBulbs: Map<string, WizBulbInfo> = new Map();
-
-            const message = Buffer.from(JSON.stringify({
-                method: "getSystemConfig",
-                params: {}
-            }));
-
-            socket.on('message', (msg, rinfo) => {
-                try {
-                    const response: WizResponse = JSON.parse(msg.toString());
-
-                    if (response.result?.mac) {
-                        discoveredBulbs.set(rinfo.address, {
-                            ip: rinfo.address,
-                            mac: response.result.mac,
-                            model: response.result.moduleName || "Unknown"
-                        });
-                    }
-                } catch (err) {
-                    console.error("Error parsing response:", err);
-                }
-            });
-
-            socket.on('error', (err) => {
-                console.error("Socket error:", err);
-                socket.close();
-                reject(err);
-            });
-
-            socket.bind(() => {
-                socket.setBroadcast(true);
-                socket.send(message, 0, message.length, WIZ_PORT, BROADCAST_ADDR, (err) => {
-                    if (err) {
-                        console.error("Send error:", err);
-                        socket.close();
-                        reject(err);
-                    } else {
-                        console.log("Broadcast sent, waiting for responses...");
-                    }
-                });
-            });
-
-            setTimeout(() => {
-                socket.close();
-                resolve([...discoveredBulbs.values()]);
-            }, waitTime);
-        });
-    }
-
-    /**
-     * Generates a UDP status message for Wiz bulbs.
-     * @param id - Unique identifier for the request.
-     * @returns Buffer containing the status request message.
-     */
-    function statusMsgFromId(id: number): Buffer {
-        return Buffer.from(JSON.stringify({
-            id: id,
-            method: "getPilot",
-            params: {}
-        }));
-    }
-
-
     type LightFilterFunction = (data: WizResponse) => boolean;
 
     export function partyFilter(data: WizResponse): boolean {
@@ -246,7 +70,6 @@ namespace WizLights {
      * @param waitTime - Time in milliseconds to wait for responses.
      * @returns Promise resolving to an array of IP addresses for bulbs that are on.
      */
-
     export async function getOnBulbsInfo(
         filterFunction: LightFilterFunction = (data) => data.method === "getPilot" && data.result?.state === true,
         waitTime: number = WAIT_TIME,
