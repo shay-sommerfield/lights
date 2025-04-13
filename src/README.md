@@ -19,7 +19,14 @@ In the `package.json`
 For example:
 `npm run build` is just `npx tsc` under the hood.
 
-### Build and build:clean
+### format
+Uses the prettier package to format all `typescrpt`, `javascript`, `json`, and md `files`. 
+
+```bash
+npm run format
+```
+TODO: Use husky and lint-staged to enable hook to run this before commits and only on staged files. 
+### build and build:clean
 
 Compiles the typescript files in `src` to javascript files in `build`:
 
@@ -30,7 +37,7 @@ npm run build
 Cleans the `build` dir first:
 
 ```bash
-num run clean-build
+npm run clean-build
 ```
 
 ### Get status
@@ -38,7 +45,7 @@ num run clean-build
 Just returns the current state of all online lights
 
 ```bash
-nom run get-status
+npm run get-status
 ```
 
 ### Set Group
@@ -48,3 +55,7 @@ Saves a set of bulbs into a json file.
 1. Use the Wiz app to turn all desired bulbs into party mode
 1. `npm run set-group` and answer the prompt to save bulbs into a group for later!
 1. Commit your json file so it is saved.
+
+```bash
+npm run set-group
+```
