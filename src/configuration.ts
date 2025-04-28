@@ -76,8 +76,8 @@ export async function savePartyBulbsToGroup() {
 
 /**
  * Returns an array of WizLights.Light for a group that was previously defined
- * using savePartBulbsToGroup
- * @see {@link savePartBulbsToGroup}
+ * using savePartyBulbsToGroup
+ * @see {@link savePartyBulbsToGroup}
  *
  * @param name Name of the bulb group (e.g. "office")
  * @returns Array of WizLights.Light with Mac addresses in that group
