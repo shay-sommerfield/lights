@@ -1,6 +1,6 @@
 env/
 *.pyc
-settings.js
-node_modules/
-build/
-.env
+settings.json
+
+node_modules
+build

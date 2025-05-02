@@ -10,7 +10,7 @@ async def discover():
     bulbs = await discover_lights(broadcast_space="192.168.1.255")
     bulb_macs = []
     for bulb in bulbs:
-        print(bulb.ip, bulb.mac, bulb.bulbtype)
+        print(bulb.ip, bulb.mac, bulb.status)
         bulb_macs.append(bulb.mac)
     
     if args.save:
