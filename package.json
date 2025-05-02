@@ -1,0 +1,24 @@
+{
+  "name": "udp_examples",
+  "version": "1.0.0",
+  "main": "discover.js",
+  "scripts": {
+    "build": "tsc",
+    "clean-build": "rm build/** && npm run build",
+    "format": "prettier --write 'src/**/*.{ts,tsx,js,json,md}'",
+    "set-group": "node build/set-group.js",
+    "sandbox": "node build/sandbox.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "dependencies": {
+    "@types/node": "^22.13.9"
+  }
+}

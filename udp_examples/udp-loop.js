@@ -24,8 +24,6 @@ const sendUdpMessage = (message, ip, port) => {
 
 const SERVER_PORT = 38899;  // Replace with your server's port
 const ipAddresses = [
-    '192.168.1.112',
-    '192.168.1.115',
     '192.168.1.116',
     ]
 // Function to delay execution for a specified number of milliseconds
@@ -47,20 +45,28 @@ const loopSendMessages = async () => {
             }
         };
 
-        // Convert JSON to string and then to a buffer
-        const message = Buffer.from(JSON.stringify(jsonPayload));
+        // const jsonPayload = {"method":"getPilot","params":{}};
 
-        // Send the message to all IPs
-        const sendPromises = ipAddresses.map(ip => sendUdpMessage(message, ip, SERVER_PORT));
+        // Function to send messages to all IP addresses and handle the response
+        const sendMessagesToAllIPs = async (jsonPayload) => {
+            // Convert JSON to string and then to a buffer
+            const message = Buffer.from(JSON.stringify(jsonPayload));
 
-        try {
-            await Promise.all(sendPromises);
-        } catch (err) {
-            console.error('Failed to send messages:', err);
-        }
+            // Send the message to all IPs
+            const sendPromises = ipAddresses.map(ip => sendUdpMessage(message, ip, SERVER_PORT));
 
-        // Wait for 1 second before sending the next set of messages
-        await delay(1000);
+            try {
+                await Promise.all(sendPromises);
+            } catch (err) {
+                console.error('Failed to send messages:', err);
+            }
+
+            // Wait for 1 second before sending the next set of messages
+            await delay(3000);
+            console.log("Sent message to all IPs");
+        };
+
+        await sendMessagesToAllIPs(jsonPayload);
     }
 };
 
