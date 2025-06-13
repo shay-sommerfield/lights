@@ -85,19 +85,31 @@ export async function savePartyBulbsToGroup() {
 export async function getLightsFromBulbGroup(
   name: string,
 ): Promise<WizLights.Light[]> {
-  const file = `../bulb_groups/${name}.json`;
-  const filePath = join(__dirname, file);
 
-  const rawData = fs.readFileSync(filePath, "utf-8");
-  const macs = JSON.parse(rawData);
-
-  const onlineLightInfoArr = await findWizLights();
-  const lights: WizLights.Light[] = [];
-  onlineLightInfoArr.forEach((info) => {
-    if (macs.includes(info.mac)) {
-      lights.push(new WizLights.Light(info));
-    }
-  });
-
+  try {
+    const file = `../bulb_groups/${name}.json`;
+    const filePath = join(__dirname, file);
+  
+    const rawData = fs.readFileSync(filePath, "utf-8");
+    const macs = JSON.parse(rawData);
+  
+    const onlineLightInfoArr = await findWizLights();
+    const lights: WizLights.Light[] = [];
+    onlineLightInfoArr.forEach((info) => {
+      if (macs.includes(info.mac)) {
+        lights.push(new WizLights.Light(info));
+      }
+    });
   return lights;
+
+  } catch (err: any) {
+  if (err.code === 'ENOENT') {
+    // Handle the missing file case
+    console.error('File not found:', err.path);
+    return [];
+  } else {
+    // Re-throw or handle other errors
+    throw err;
+  }
+}
 }
