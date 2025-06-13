@@ -25,10 +25,12 @@ Run these files with `node ./build/<name>.js` or make a script in the package.js
 ### Library files
 | File name        | Functionality                                                                                                                                                   |
 | :--------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| discover.ts      | Finds all currently online bulbs and turns them into a Light object. You can optionally pass a filter function that will only return lights in a certain state. |
+| index.ts         | Puts UDP commands into nice functions and defines wiz requests and responses.                                                                                   |
+| discover.ts      | Express server. Currently just wraps the stereo outlet.                                                                                                         |
 | configuration.ts | Handles saving and retrieving Light objects from json files located in the bulb groups directory. Bulbs are saved as just an array of Mac addresses.            |
-| wizlights.ts     | The file that will contain all abstractions for lights. Adding light groups would be a good next step.                                                         |
+| wizlights.ts     | The file that will contain all abstractions for lights. Adding light groups would be a good next step.                                                          |
 | wiz-udp.ts       | Puts UDP commands into nice functions and defines wiz requests and responses.                                                                                   |
+
 
 ## Useful scripts and commands
 
@@ -37,6 +39,9 @@ In the `package.json`
 
 For example:
 `npm run build` is just `npx tsc` under the hood.
+
+### start
+Starts the express server after it has been compiled `npm run start`
 
 ### format
 Uses the prettier package to format all `typescript`, `javascript`, `json`, and md `files`. 
