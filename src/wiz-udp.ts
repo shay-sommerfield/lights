@@ -24,39 +24,69 @@ export type WizEnv =
   | "scene" // Actively in a named/static scene
   | "extcontrol"; // Being controlled by an external system (e.g., voice assistant)
 
+
+
 export interface WizBaseRequest {
   id: number;
   method: string;
   params: Object;
 }
 
-export interface WizStateRequest extends WizBaseRequest {
-  method: "setState";
-  params: {
-    state?: boolean;
-    dimming?: number;
-  };
-}
 
-export interface WizTempRequest extends WizBaseRequest {
-  method: "setPilot";
-  params: {
-    temp: number;
-    dimming: number;
-  };
-}
-
-export interface WizRgbRequest extends WizBaseRequest {
-  method: "setPilot";
-  params: {
+export interface WizRgbParams {
     r: number;
     g: number;
     b: number;
     dimming: number;
-  };
+  }
+
+export interface WizStateParams {
+  state: boolean;
+  dimming?: boolean;
+}
+
+export interface WizTempParams {
+    temp: number;
+    dimming: number;
+  }
+
+export interface WizStateRequest extends WizBaseRequest {
+  method: "setState";
+  params: WizStateParams
+}
+
+export interface WizTempRequest extends WizBaseRequest {
+  method: "setPilot";
+  params: WizTempParams
+}
+
+export interface WizRgbRequest extends WizBaseRequest {
+  method: "setPilot";
+  params: WizRgbParams
+}
+
+// Type guard for WizTempParams
+export function isTempParams(obj: any): obj is WizTempParams {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.temp === 'number'
+  );
+}
+
+// Type guard for WizTempParams
+export function isRgbParams(obj: any): obj is WizRgbParams {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    typeof obj.r === 'number' && 
+     typeof obj.g === 'number' && 
+      typeof obj.b === 'number'
+  );
 }
 
 export type WizRequest = WizStateRequest | WizRgbRequest | WizTempRequest;
+export type WizParams =  WizTempParams | WizRgbParams;
 
 export interface WizGetPilotResult {
   mac: string;

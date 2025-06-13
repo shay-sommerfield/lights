@@ -1,7 +1,13 @@
 import {
+  isRgbParams,
+  isTempParams,
   sendMessage,
   WizBulbInfo,
   WizGetPilotResult,
+  WizParams,
+  WizRequest,
+  WizRgbParams,
+  WizRgbRequest,
   WizStateRequest,
   WizTempRequest,
 } from "./wiz-udp";
@@ -31,15 +37,41 @@ export namespace WizLights {
       return this._id;
     }
 
-    async turnOn() {
-      const onMsg: WizStateRequest = {
-        id: this.id,
-        method: "setState",
-        params: {
-          state: true,
-        },
-      };
+    async turnOn(params?: WizParams) {
+
+      let onMsg: WizRequest;
+      
+      if (!params){
+        onMsg = {
+                id: this.id,
+                method: "setState",
+                params: {
+                  state: true,
+                },
+              };
+      } else if(isTempParams(params)) {
+        const tempOnMsg: WizTempRequest = {
+          id: this.id, 
+          method: "setPilot",
+          params
+        }
+
+        onMsg = tempOnMsg;
+      } else if (isRgbParams(params)){
+        const tempOnMsg: WizRgbRequest = {
+          id: this.id, 
+          method: "setPilot",
+          params
+        }
+
+        onMsg = tempOnMsg;
+      } 
+      else {
+        throw new Error('Invalid params passed to light');
+      }
+      
       await sendMessage(this.ip, onMsg);
+      this.lastStatus.state = true;
     }
 
     async turnOnWarmWhite() {
@@ -63,6 +95,15 @@ export namespace WizLights {
         },
       };
       await sendMessage(this.ip, offMsg);
+      this.lastStatus.state = false;
+    }
+
+    async toggle() {
+      if (this.lastStatus.state) {
+        this.turnOff();
+      } else {
+        this.turnOn();
+      }
     }
   }
 }
