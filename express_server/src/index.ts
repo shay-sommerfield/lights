@@ -40,10 +40,16 @@ function getBulbGroups(): string[] {
 app.get("/get_programs/", (req: express.Request, res: express.Response) => {
     // TODO: convert hardcoding of office to choice of bulb group 
     const programs = [
-        {"endpoint": "get_bulb_group/", 
-         "name": "Get Bulbs From Group",
+        {"endpoint": "flip_bulb_group/", 
+         "name": "Flip Bulbs From Group",
          "param": getBulbGroups(),
         },
+
+        {"endpoint": "turn_on_all", 
+         "name": "Turn On All"},
+
+        {"endpoint": "turn_off_all", 
+         "name": "Turn Off All"},
 
         {"endpoint": "start_color_cycle", 
          "name": "Start Color Sequence"},
@@ -51,11 +57,9 @@ app.get("/get_programs/", (req: express.Request, res: express.Response) => {
         {"endpoint": "stop_color_cycle", 
          "name": "Stop Color Sequence"},
 
+         //TODO: enable this endpoints
         {"endpoint": "run_binary_counter", 
          "name": "Binary Counter"},
-         
-        {"endpoint": "turn_off_orbs", 
-         "name": "Turn off orbs"}
         ]
     res.send(programs);
 });
@@ -103,7 +107,8 @@ app.get("/stop_color_cycle", (req: express.Request, res: express.Response) => {
     res.json({ message: "Stopped color cycle" });
 });
 
-app.get("/get_bulb_group/:name", async (req: express.Request, res: express.Response) => {
+// TODO: Change this to flipping lights from current state (on/off)
+app.get("/flip_bulb_group/:name", async (req: express.Request, res: express.Response) => {
     const groupName = req.params.name;
     console.log(`Retrieving bulb group: ${groupName}`);
     try {
@@ -119,6 +124,48 @@ app.get("/get_bulb_group/:name", async (req: express.Request, res: express.Respo
     } catch (error) {
         console.error(`Error retrieving bulb group ${groupName}:`, error);
         res.status(500).send(`Error retrieving bulb group ${groupName}`);
+    }
+});
+
+// Endpoint to turn on all lights in all groups
+app.get("/turn_on_all/", async (req: express.Request, res: express.Response) => {
+    const groupNames = getBulbGroups();
+    try {
+        //go through each group and turn on all lights (reset by turning off first)
+        groupNames.forEach(async (groupName) => {
+            console.log(`Retrieving bulb group: ${groupName}`);
+            const lights = await getLightsFromBulbGroup(groupName);
+            lights.forEach(async (light) => {
+                // Turn on each light in the group
+                await light.turnOff();
+                await sleep();
+                await light.turnOn();
+            });
+            console.log(`Successfully retrieved bulb group: ${groupName}`);
+        });
+        res.json({ message: "All lights turned on" });
+    } catch (error) {
+        console.error(`Error turning on all lights`, error);
+    }
+});
+
+// Endpoint to turn off all lights in all groups
+app.get("/turn_off_all/", async (req: express.Request, res: express.Response) => {
+    const groupNames = getBulbGroups();
+    try {
+        //go through each group and turn off all lights
+        groupNames.forEach(async (groupName) => {
+            console.log(`Retrieving bulb group: ${groupName}`);
+            const lights = await getLightsFromBulbGroup(groupName);
+            lights.forEach(async (light) => {
+                // Turn off each light in the group
+                await light.turnOff();
+            });
+            console.log(`Successfully retrieved bulb group: ${groupName}`);
+        });
+        res.json({ message: "All lights turned off" });
+    } catch (error) {
+        console.error(`Error turning off all lights`, error);
     }
 });
   

@@ -5,6 +5,7 @@ body {
     height: 100vh;
 }
 
+/* Centering the main title */
 .site-title {
     text-align: center;
     font-size: 2.5em;
@@ -12,6 +13,7 @@ body {
     color: #6d6875;
 }
 
+/* Main container for the program buttons */
 .program-container {
     display: flex;
     flex-wrap: wrap;
@@ -23,19 +25,27 @@ body {
     margin: 20px;
 }
 
+/* Container for programs buttons with params */
 .param-container {
     display: flex;
     flex-direction: column;
     align-items: center;
     margin: 0 15px 0px 10px;
     gap: 16px;
+    padding: 20px;
+    background: #fff3e6;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }
 
-.program-button {
-    padding: 10px 20px;
-    margin: 20px;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+/* Container for single (non-param) program buttons */
+.single-programs {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px; /* Space between buttons */
+    padding: 20px;
+    background: #fff3e6;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
 }

@@ -33,18 +33,40 @@ function App(){
         <ThemeProvider theme={theme}>
         <h1 className="site-title">Three Orb Control Panel</h1>
         <Box className="program-container" color="primary">
-        {gotPrograms ? programs.map((program) => ( // If got programs then loop through all programs and create a button for each
-            // If params exist then loop through all params and create a button for each
-            Array.isArray(program.param) ? (
+        {gotPrograms ? (
+          <>
+            {/* Param programs */}
+            {programs
+              .filter(program => Array.isArray(program.param))
+              .map(program => (
                 <Box key={program.name} className="param-container" display="flex" flexDirection="column" alignItems="center">
-                    <h3>{program.name}</h3>
-                    {program.param.map((param) => (
-                        <LightButton key={`${program.name}: ${param}`} label={`${program.name}: ${param}`} endpoint={program.endpoint} param={param}></LightButton>
-                    ))}
-                </Box>)
-            :
-                <LightButton key={program.name} label={program.name} endpoint={program.endpoint}></LightButton>
-             )) :
+                  <h3>{program.name}</h3>
+                  {program.param.map(param => (
+                    <LightButton
+                      key={`${program.name}: ${param}`}
+                      label={`${program.name}: ${param}`}
+                      endpoint={program.endpoint}
+                      param={param}
+                    />
+                  ))}
+                </Box>
+              ))}
+
+            {/* Non-param programs grouped in a single box */}
+            <Box className="single-programs" display="flex" flexDirection="column" alignItems="center">
+              <h3>Single Programs</h3>
+              {programs
+                .filter(program => !Array.isArray(program.param))
+                .map(program => (
+                  <LightButton
+                    key={program.name}
+                    label={program.name}
+                    endpoint={program.endpoint}
+                  />
+                ))}
+            </Box>
+          </>
+        )  :
              <Box color="primary.contrastText">No Programs Found</Box>
             }
         </Box>
