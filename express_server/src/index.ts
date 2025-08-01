@@ -1,6 +1,7 @@
 import express from "express";
 import env from "dotenv";
-import path from "path";
+import * as fs from "fs";
+import path, {join} from "path";
 import { getLightsFromBulbGroup } from "./configuration";
 
 const app = express();
@@ -21,13 +22,28 @@ async function sleep(timout: number = TIMEOUT): Promise<void> {
 
 }
 
+function getBulbGroups(): string[] {
+    const folderPath = join(__dirname, `../bulb_groups/`);
+
+    //look for all files in the bulb_groups directory
+    const groups = fs.readdirSync(folderPath)
+        .filter(file => file.endsWith('.json'))
+        .map(file => file.replace('.json', '')); // Remove the .json extension
+    console.log(`Available bulb groups: ${groups.join(', ')}`);
+
+  return groups
+
+}
+
 //get programs sends the light programs available, 
 //for defining frontend buttons and endpoints
 app.get("/get_programs/", (req: express.Request, res: express.Response) => {
     // TODO: convert hardcoding of office to choice of bulb group 
     const programs = [
-        {"endpoint": "get_bulb_group/office", 
-         "name": "Get Bulbs From Group"},
+        {"endpoint": "get_bulb_group/", 
+         "name": "Get Bulbs From Group",
+         "param": getBulbGroups(),
+        },
 
         {"endpoint": "run_color_cycle", 
          "name": "Color Sequence"},
