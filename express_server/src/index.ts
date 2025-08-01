@@ -45,8 +45,11 @@ app.get("/get_programs/", (req: express.Request, res: express.Response) => {
          "param": getBulbGroups(),
         },
 
-        {"endpoint": "run_color_cycle", 
-         "name": "Color Sequence"},
+        {"endpoint": "start_color_cycle", 
+         "name": "Start Color Sequence"},
+
+        {"endpoint": "stop_color_cycle", 
+         "name": "Stop Color Sequence"},
 
         {"endpoint": "run_binary_counter", 
          "name": "Binary Counter"},
@@ -55,6 +58,49 @@ app.get("/get_programs/", (req: express.Request, res: express.Response) => {
          "name": "Turn off orbs"}
         ]
     res.send(programs);
+});
+
+let colorCycleActive = false;
+// Endpoint to start a color cycle across three orb lights
+app.get("/start_color_cycle", async (req: express.Request, res: express.Response) => {
+    //check if already running
+    if (colorCycleActive) {
+        return res.json({ message: "Color cycle already running" });
+    }
+    colorCycleActive = true;
+    const groupName = "three_orbs";
+    const rgb_palette = [
+        { r: 0, g: 0, b: 255, dimming: 100 },
+        { r: 0, g: 255, b: 0, dimming: 100 },
+        { r: 255, g: 0, b: 0, dimming: 100 }
+    ];
+    //start the color cycle
+    (async () => {
+        try {
+            const lights = await getLightsFromBulbGroup(groupName);
+            let step = 0;
+            //while not interrupted, loop through lights and colors continually
+            while (colorCycleActive) {
+                //happens fast enough that it looks like all lights are changing at once
+                for (let i = 0; i < lights.length; i++) {
+                    const color = rgb_palette[(i + step) % rgb_palette.length];
+                    await lights[i].turnOnColor(color.r, color.g, color.b, color.dimming);
+                }
+                // Sleep before changing colors
+                await sleep();
+                step++;
+            }
+        } catch (error) {
+            console.error("Error in color cycle:", error);
+        }
+    })();
+    res.json({ message: "Started color cycle" });
+});
+
+//Stop three orb color cycle
+app.get("/stop_color_cycle", (req: express.Request, res: express.Response) => {
+    colorCycleActive = false;
+    res.json({ message: "Stopped color cycle" });
 });
 
 app.get("/get_bulb_group/:name", async (req: express.Request, res: express.Response) => {

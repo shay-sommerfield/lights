@@ -4,6 +4,7 @@ import {
   WizGetPilotResult,
   WizStateRequest,
   WizTempRequest,
+  WizRgbRequest,
 } from "./wiz-udp";
 
 /**
@@ -49,6 +50,20 @@ export namespace WizLights {
         params: {
           temp: 3000,
           dimming: 75,
+        },
+      };
+      await sendMessage(this.ip, onMsg);
+    }
+
+    async turnOnColor(inR: number, inG: number, inB: number, inDim: number) {
+      const onMsg: WizRgbRequest = {
+        id: 1,
+        method: "setPilot",
+        params: {
+          r: inR,
+          g: inG,
+          b: inB,
+          dimming: inDim,
         },
       };
       await sendMessage(this.ip, onMsg);
