@@ -17,8 +17,17 @@ function LightButton (props) {
         }
     };
 
+    // Disable the button if the endpoint is 'run_binary_counter'
+    // This is a placeholder condition until this functionality is implemented
+    const isBinaryCounter = props.endpoint === 'run_binary_counter';
+
     return (
-        <Button className="program-button" variant="contained" onClick={handleClick}>
+        <Button 
+            className="program-button" 
+            variant="contained" 
+            onClick={handleClick}
+            disabled={isBinaryCounter}
+        >
         {props.label}
         </Button>
     );
