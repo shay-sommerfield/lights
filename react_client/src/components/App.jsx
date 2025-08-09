@@ -31,7 +31,7 @@ function App(){
     return(
     <div>
         <ThemeProvider theme={theme}>
-        <h1 className="site-title">Three Orb Control Panel</h1>
+        <h1 className="site-title">Wiz Light Control Panel</h1>
         <Box className="program-container" color="primary">
         {gotPrograms ? (
           <>
