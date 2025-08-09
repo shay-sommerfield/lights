@@ -1,5 +1,15 @@
 # Wiz lights!
 
+## Description
+This project was created for the purpose of having greater control over our home Wiz lights. We wanted to enable functionality not otherwise accessible through the Wiz app, like the ability to create a rotating color cycle between selected lights, as shown in the video below. 
+
+This project started by using the PyWiz library and a static webpage and is now being converted to UDP protocols managed in typescript and a webpage developed with Express.ts and React. It is deployed on a Raspberry Pi server and accessible only on our local network. Migration is still in progress, so the website's current state has not yet been pushed to our server, but locally, it appears and functions as demonstrated in the images below:
+
+[<img src="./sources_readme/ControlPanelMainPage.png" width="700px"/>](## "Image of the main page of our Wiz Light Control Panel site")
+
+### After clicking on the *Start Color Sequence* button, the following is initiated
+[<img src="./sources_readme/StartColorSequence.gif" width="475px"/>](## "Gif of our Start Color Sequence button action - a three orb bulb cycles each light between red, green, and blue, in a continuous loop")
+
 ## Local Build
 The frontend is hosted by React and run through vite.
 The backend is hosted by Express.ts.
@@ -25,7 +35,7 @@ npm i
 npm run dev
 ```
 
-## Light Programs from the server [<img src="./info_icon_white.png" width="15px"/>](## "Needs updating when final switch from python to express is deployed")
+## Light Programs from the server [<img src="./sources_readme/info_icon_white.png" width="15px"/>](## "Needs updating when final switch from python to express is deployed")
 Run `./start_server.sh` to start a localhost server
 
 ### Testing the server is up
