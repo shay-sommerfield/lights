@@ -3,6 +3,7 @@ import env from "dotenv";
 import * as fs from "fs";
 import path, {join} from "path";
 import { getLightsFromBulbGroup } from "./configuration";
+import { WizLights } from "./wizlights";
 
 const app = express();
 // Load the root .env file
@@ -22,6 +23,8 @@ async function sleep(timout: number = TIMEOUT): Promise<void> {
 
 }
 
+// Retrieves available bulb groups from the 'bulb_groups' directory
+// and returns their names as an array of strings.
 function getBulbGroups(): string[] {
     const folderPath = join(__dirname, `../bulb_groups/`);
 
@@ -31,8 +34,21 @@ function getBulbGroups(): string[] {
         .map(file => file.replace('.json', '')); // Remove the .json extension
     console.log(`Available bulb groups: ${groups.join(', ')}`);
 
-  return groups
+  return groups;
+}
 
+// Flips all lights in a bulb group off and on
+// This resets the lights to their previous state
+async function flipBulbGroup(groupName: string): Promise<WizLights.Light[]> {
+    console.log(`Resetting bulb group: ${groupName}`);
+    const lights = await getLightsFromBulbGroup(groupName);
+    //This async loop allows the lights to be turned off and on in parallel
+    lights.forEach(async (light) => {
+        await light.turnOff();
+        await sleep()
+        await light.turnOn();
+    });
+    return lights;
 }
 
 //get programs sends the light programs available, 
@@ -40,8 +56,8 @@ function getBulbGroups(): string[] {
 app.get("/get_programs/", (req: express.Request, res: express.Response) => {
     // TODO: convert hardcoding of office to choice of bulb group 
     const programs = [
-        {"endpoint": "flip_bulb_group/", 
-         "name": "Flip Bulbs From Group",
+        {"endpoint": "reset_bulb_group/", 
+         "name": "Reset Bulbs From Group",
          "param": getBulbGroups(),
         },
 
@@ -101,29 +117,28 @@ app.get("/start_color_cycle", async (req: express.Request, res: express.Response
     res.json({ message: "Started color cycle" });
 });
 
-//Stop three orb color cycle
-app.get("/stop_color_cycle", (req: express.Request, res: express.Response) => {
+// Stop three orb color cycle and reset lights
+app.get("/stop_color_cycle", async (req: express.Request, res: express.Response) => {
     colorCycleActive = false;
-    res.json({ message: "Stopped color cycle" });
+    try {
+        const lights = await flipBulbGroup("three_orbs");
+        res.json({ message: "Color cycle stopped and lights reset", lights });
+    } catch (error) {
+        console.error(`Error resetting lights for group three_orbs:`, error);
+        res.status(500).send(`Error resetting lights for group three_orbs`);
+    }
 });
 
-// TODO: Change this to flipping lights from current state (on/off)
-app.get("/flip_bulb_group/:name", async (req: express.Request, res: express.Response) => {
+// Flip bulb group endpoint
+app.get("/reset_bulb_group/:name", async (req: express.Request, res: express.Response) => {
     const groupName = req.params.name;
     console.log(`Retrieving bulb group: ${groupName}`);
     try {
-        const lights = await getLightsFromBulbGroup(groupName);
-        lights.forEach(async (light) => {
-            // Enter what you want each light from the room to do:
-            await light.turnOff();
-            await sleep()
-            await light.turnOn();
-        });
-        res.json(lights);
-        console.log(`Successfully retrieved bulb group: ${groupName}`);
+        const lights = await flipBulbGroup(groupName);
+        res.json({message: `Successfully flipped bulb group: ${groupName}`, lights});
     } catch (error) {
-        console.error(`Error retrieving bulb group ${groupName}:`, error);
-        res.status(500).send(`Error retrieving bulb group ${groupName}`);
+        console.error(`Error flipping bulb group ${groupName}:`, error);
+        res.status(500).send(`Error flipping bulb group ${groupName}`);
     }
 });
 
@@ -133,15 +148,8 @@ app.get("/turn_on_all/", async (req: express.Request, res: express.Response) => 
     try {
         //go through each group and turn on all lights (reset by turning off first)
         groupNames.forEach(async (groupName) => {
-            console.log(`Retrieving bulb group: ${groupName}`);
-            const lights = await getLightsFromBulbGroup(groupName);
-            lights.forEach(async (light) => {
-                // Turn on each light in the group
-                await light.turnOff();
-                await sleep();
-                await light.turnOn();
-            });
-            console.log(`Successfully retrieved bulb group: ${groupName}`);
+            const lights = await flipBulbGroup(groupName);
+            console.log(`Successfully flipped bulb group: ${groupName}`);
         });
         res.json({ message: "All lights turned on" });
     } catch (error) {

@@ -11,6 +11,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     server: {
+      host: true, //makes accessible on local network
       proxy: {
         '/python': {
           target: `http://${env.PYTHON_HOST}:${env.PYTHON_PORT}`,
