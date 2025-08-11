@@ -131,6 +131,7 @@ app.get("/stop_color_cycle", async (req: express.Request, res: express.Response)
 
 // Flip bulb group endpoint
 app.get("/reset_bulb_group/:name", async (req: express.Request, res: express.Response) => {
+    colorCycleActive = false;
     const groupName = req.params.name;
     console.log(`Retrieving bulb group: ${groupName}`);
     try {
