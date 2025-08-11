@@ -145,6 +145,7 @@ app.get("/reset_bulb_group/:name", async (req: express.Request, res: express.Res
 
 // Endpoint to turn on all lights in all groups
 app.get("/turn_on_all/", async (req: express.Request, res: express.Response) => {
+    colorCycleActive = false;
     const groupNames = getBulbGroups();
     try {
         //go through each group and turn on all lights (reset by turning off first)
@@ -160,6 +161,7 @@ app.get("/turn_on_all/", async (req: express.Request, res: express.Response) => 
 
 // Endpoint to turn off all lights in all groups
 app.get("/turn_off_all/", async (req: express.Request, res: express.Response) => {
+    colorCycleActive = false;
     const groupNames = getBulbGroups();
     try {
         //go through each group and turn off all lights
